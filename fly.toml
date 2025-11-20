@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for laraveltest-purple-dawn-8060 on 2025-11-20T00:47:00-03:00
+# fly.toml app configuration file generated for laraveltest-frosty-log-30 on 2025-11-20T01:02:42-03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'laraveltest-purple-dawn-8060'
+app = 'laraveltest-frosty-log-30'
 primary_region = 'iad'
 console_command = 'php /var/www/html/artisan tinker'
 
