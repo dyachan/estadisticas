@@ -19,6 +19,12 @@ console_command = 'php /var/www/html/artisan tinker'
   LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
   SESSION_DRIVER = 'cookie'
   SESSION_SECURE_COOKIE = 'true'
+  DB_CONNECTION='pgsql'
+  DB_HOST="db.rltumhgjnkxelwvubxwl.supabase.co"
+  DB_DATABASE="postgres"
+  DB_USERNAME="postgres"
+  DB_PASSWORD="KEmV8L42HyplkxD8"
+  DB_URL="postgres://postgres.rltumhgjnkxelwvubxwl:KEmV8L42HyplkxD8@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x"
 
 [http_service]
   internal_port = 8080
