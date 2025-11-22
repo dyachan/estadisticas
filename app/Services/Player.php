@@ -233,23 +233,23 @@ class Player
                 break;
 
             case "Go to my goal":
-                $goalX = $this->currentFieldSide === "left" ? 10 : $fieldWidth - 10;
-                $this->target = ['x' => $goalX, 'y' => $fieldHeight / 2];
+                $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
+                $this->target = ['x' => $fieldWidth / 2, 'y' => $goalY];
                 break;
 
             case "Go to rival goal":
-                $goalX = $this->currentFieldSide === "left" ? $fieldWidth - 10 : 10;
-                $this->target = ['x' => $goalX, 'y' => $fieldHeight / 2];
+                $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
+                $this->target = ['x' => $fieldWidth / 2, 'y' => $goalY];
                 break;
 
             case "Go forward":
-                $goalX = $this->currentFieldSide === "left" ? $fieldWidth - 10 : 10;
-                $this->target = ['x' => $goalX, 'y' => $this->y];
+                $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
+                $this->target = ['x' => $this->x, 'y' => $goalY];
                 break;
 
             case "Go back":
-                $goalX = $this->currentFieldSide === "left" ? 10 : $fieldWidth - 10;
-                $this->target = ['x' => $goalX, 'y' => $this->y];
+                $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
+                $this->target = ['x' => $this->x, 'y' => $goalY];
                 break;
 
             case "Pass the ball":
@@ -290,13 +290,19 @@ class Player
                 break;
 
             case "Change side":
-                $upper = ['x' => $this->x, 'y' => $fieldHeight * 0.3];
-                $lower = ['x' => $this->x, 'y' => $fieldHeight * 0.7];
+                $left = ['x' => $fieldWidth * (0.3-rand(1,20)/100), 'y' => $this->y];
+                $right = ['x' => $fieldWidth * (0.7+rand(1,20)/100), 'y' => $this->y];
 
-                if ($this->y > $fieldHeight * 0.5) {
-                    $this->target = $upper;
-                } else {
-                    $this->target = $lower;
+                if ($this->x >= $right['x']) {
+                    $this->target = $left;
+                } else if($this->x <= $left['x']) {
+                    $this->target = $right;
+                } else if($this->target == null){
+                    if($this->x < $fieldWidth*0.5){
+                        $this->target = $right;
+                    } else {
+                        $this->target = $left;
+                    }
                 }
                 break;
 
@@ -363,28 +369,28 @@ class Player
                 return $this->opponentNear;
 
             case "The ball is near my goal":
-                return ($this->currentFieldSide === "left" && $ball->x < $fieldWidth * 0.3) ||
-                       ($this->currentFieldSide === "right" && $ball->x > $fieldWidth * 0.7);
+                return ($this->currentFieldSide === "bottom" && $ball->y < $fieldHeight * 0.3) ||
+                       ($this->currentFieldSide === "top" && $ball->y > $fieldHeight * 0.7);
 
             case "The ball is in my side":
-                return ($this->currentFieldSide === "left" && $ball->x < $fieldWidth * 0.51) ||
-                       ($this->currentFieldSide === "right" && $ball->x > $fieldWidth * 0.49);
+                return ($this->currentFieldSide === "bottom" && $ball->y < $fieldHeight * 0.51) ||
+                       ($this->currentFieldSide === "top" && $ball->y > $fieldHeight * 0.49);
 
             case "The ball is in other side":
-                return ($this->currentFieldSide === "right" && $ball->x < $fieldWidth * 0.51) ||
-                       ($this->currentFieldSide === "left" && $ball->x > $fieldWidth * 0.49);
+                return ($this->currentFieldSide === "top" && $ball->y < $fieldHeight * 0.51) ||
+                       ($this->currentFieldSide === "bottom" && $ball->y > $fieldHeight * 0.49);
 
             case "The ball is near rival goal":
-                return ($this->currentFieldSide === "right" && $ball->x < $fieldWidth * 0.3) ||
-                       ($this->currentFieldSide === "left" && $ball->x > $fieldWidth * 0.7);
+                return ($this->currentFieldSide === "top" && $ball->y < $fieldHeight * 0.3) ||
+                       ($this->currentFieldSide === "bottom" && $ball->y > $fieldHeight * 0.7);
 
             case "Rival in my side":
-                return ($this->currentFieldSide === "left" && !collect($opponents)->every(fn($p) => $p->x > $fieldWidth * 0.49))
-                    || ($this->currentFieldSide === "right" && !collect($opponents)->every(fn($p) => $p->x < $fieldWidth * 0.51));
+                return ($this->currentFieldSide === "top" && !collect($opponents)->every(fn($p) => $p->y > $fieldHeight * 0.49))
+                    || ($this->currentFieldSide === "bottom" && !collect($opponents)->every(fn($p) => $p->y < $fieldHeight * 0.51));
 
             case "No rival in my side":
-                return ($this->currentFieldSide === "left" && collect($opponents)->every(fn($p) => $p->x > $fieldWidth * 0.49))
-                    || ($this->currentFieldSide === "right" && collect($opponents)->every(fn($p) => $p->x < $fieldWidth * 0.51));
+                return ($this->currentFieldSide === "top" && collect($opponents)->every(fn($p) => $p->y > $fieldHeight * 0.49))
+                    || ($this->currentFieldSide === "bottom" && collect($opponents)->every(fn($p) => $p->y < $fieldHeight * 0.51));
 
             default:
                 return false;

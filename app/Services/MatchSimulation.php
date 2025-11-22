@@ -29,7 +29,7 @@ class MatchSimulation
     public array $logs = [];
     public string $ballOwnerTeam = "";
 
-    public function __construct($width = 800, $height = 400)
+    public function __construct($width = 400, $height = 600)
     {
         $this->width = $width;
         $this->height = $height;
@@ -55,9 +55,9 @@ class MatchSimulation
         $this->players = [];
 
         $initialPositions = [
-            ["x" => $this->width * 0.25, "y" => $this->height * 0.5],
-            ["x" => $this->width * 0.40, "y" => $this->height * 0.3],
-            ["x" => $this->width * 0.40, "y" => $this->height * 0.7],
+            ["x" => $this->width * 0.5, "y" => $this->height * 0.25],
+            ["x" => $this->width * 0.3, "y" => $this->height * 0.40],
+            ["x" => $this->width * 0.7, "y" => $this->height * 0.40],
         ];
 
         // Team A
@@ -68,10 +68,10 @@ class MatchSimulation
                 "rules" => $p["rules"],
                 "x" => $initialPositions[$i]["x"],
                 "y" => $initialPositions[$i]["y"],
-                "baseX" => $this->width * ($p["defaultZone"]["x"] / 100),
-                "baseY" => $this->height * ($p["defaultZone"]["y"] / 100),
-                "defaultAction" => "Keep in my zone",
-                "currentFieldSide" => "left"
+                "baseX" => $this->width * $p["defaultZone"]["x"] / 100,
+                "baseY" => $this->height * $p["defaultZone"]["y"] / 100,
+                "defaultAction" => "Stay in my zone",
+                "currentFieldSide" => "bottom"
             ]);
         }
 
@@ -82,11 +82,11 @@ class MatchSimulation
                 "name" => $p["name"],
                 "rules" => $p["rules"],
                 "x" => $this->width - $initialPositions[$i]["x"],
-                "y" => $initialPositions[$i]["y"],
-                "baseX" => $this->width * ($p["defaultZone"]["x"] / 100),
-                "baseY" => $this->height * ($p["defaultZone"]["y"] / 100),
-                "defaultAction" => "Keep in my zone",
-                "currentFieldSide" => "right"
+                "y" => $this->height - $initialPositions[$i]["y"],
+                "baseX" => $this->width * (100-$p["defaultZone"]["x"]) / 100,
+                "baseY" => $this->height * (100-$p["defaultZone"]["y"]) / 100,
+                "defaultAction" => "Stay in my zone",
+                "currentFieldSide" => "top"
             ]);
         }
     }
@@ -107,9 +107,10 @@ class MatchSimulation
         $ballOffset = $this->PLAYER_SIZE * 0.5 + 3;
 
         // Check goal / reset
-        if ($this->ball->x < $ballOffset || $this->ball->x > $this->width - $ballOffset) {
-            if($this->ball->y > ($this->height - $this->GOAL_SIZE) / 2 && $this->ball->y < ($this->height + $this->GOAL_SIZE) / 2){
-                if($this->ball->x < $ballOffset){
+        if ($this->ball->y < $ballOffset || $this->ball->y > $this->height - $ballOffset) {
+            if($this->ball->x > ($this->width - $this->GOAL_SIZE) / 2 && 
+                $this->ball->x < ($this->width + $this->GOAL_SIZE) / 2){
+                if($this->ball->y < $ballOffset){
                     $this->log("Team B do a goal");
                 } else {
                     $this->log("Team A do a goal");
@@ -133,7 +134,7 @@ class MatchSimulation
             ];
 
             $player->checkMarked($simState["opponents"], $this->PLAYER_SIZE * 1.5);
-            $player->checkOpponentNear($simState["opponents"], $this->PLAYER_SIZE * 6);
+            $player->checkOpponentNear($simState["opponents"], $this->PLAYER_SIZE * 3);
 
             $action = $player->decide($simState);
 
@@ -152,8 +153,8 @@ class MatchSimulation
                 function ($team) use ($player) {
                     // shootToCB
                     $target = [
-                        "x" => ($team === "Team A" ? $this->width : 0),
-                        "y" => (($this->height + $this->GOAL_SIZE) * 0.5) - rand(0, $this->GOAL_SIZE)
+                        "x" => (($this->width + $this->GOAL_SIZE) * 0.5) - rand(0, $this->GOAL_SIZE),
+                        "y" => ($team === "Team A" ? $this->height : 0)
                     ];
                     $this->applyForceToBall($target, 10);
                     $player->ballCooldown = self::BALLCOOLDOWN_SHOOT;
@@ -245,7 +246,7 @@ class MatchSimulation
     }
 
     // ------------------------------------------------------------------------------------
-    // BALL POSSESSION LOGIC (idéntico a JS)
+    // BALL POSSESSION LOGIC
     // ------------------------------------------------------------------------------------
     private function handleBallPossession()
     {
