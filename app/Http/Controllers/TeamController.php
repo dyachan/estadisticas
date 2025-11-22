@@ -21,19 +21,22 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
-        // Validación
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'formation' => 'required|string'
         ]);
 
-        // Crear equipo
+        if(Team::where("name", $validated["name"])->exists()){
+            return response()->json([
+                'success' => false,
+                'error'    => "Name already exists"
+            ]);
+        }
+
         $team = Team::create($validated);
 
-        // Respuesta
         return response()->json([
-            'success' => true,
-            'team'    => $team
+            'success' => true
         ], 201);
     }
 }
