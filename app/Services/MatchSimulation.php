@@ -2,18 +2,19 @@
 
 namespace App\Services;
 use App\Services\Player;
+use App\Services\MatchSummary;
 
 class MatchSimulation
 {
-    private const BALLCOOLDOWN_PASS = 20;
-    private const BALLCOOLDOWN_SHOOT = 30;
-    private const BALLCOOLDOWN_FAILED_CONTROL = 30;
-    private const BALLCOOLDOWN_BALL_DISPUTED = 20;
-    private const BALLCOOLDOWN_BALL_STEAL = 60;
-    private const BALLCOOLDOWN_TAKE_OFF = 20;
+    private const BALLCOOLDOWN_PASS = 40;
+    private const BALLCOOLDOWN_SHOOT = 50;
+    private const BALLCOOLDOWN_FAILED_CONTROL = 50;
+    private const BALLCOOLDOWN_BALL_DISPUTED = 40;
+    private const BALLCOOLDOWN_TAKE_OFF = 40;
     private const BALLCOOLDOWN_FAIL_DEFENDING = 60;
-    private const BODYCOOLDOWN_FAIL_DEFENDING = 60;
-    private const BODYCOOLDOWN_BALL_STEAL = 60;
+    private const BALLCOOLDOWN_BALL_STEAL = 60;
+    private const BODYCOOLDOWN_FAIL_DEFENDING = 70;
+    private const BODYCOOLDOWN_BALL_STEAL = 70;
 
     private float $PLAYER_SIZE = 38;
     private float $GOAL_SIZE = 120;
@@ -24,10 +25,14 @@ class MatchSimulation
     public array $players = [];
 
     public object $ball;
+    public ?Player $currentPlayerWithBall = null;
+    public ?Player $lastPlayerWithBall = null;
 
     public array $tickHistoric = [];
     public array $logs = [];
     public string $ballOwnerTeam = "";
+
+    public MatchSummary $summary;
 
     public function __construct($width = 400, $height = 600)
     {
@@ -40,6 +45,8 @@ class MatchSimulation
             "vx" => 0,
             "vy" => 0
         ];
+
+        $this->summary = new MatchSummary();
     }
 
     private function log($msg)
@@ -97,12 +104,19 @@ class MatchSimulation
     public function update(float $dt = 1)
     {
         // BALL MOVEMENT
-        $this->ball->x += $this->ball->vx;
-        $this->ball->y += $this->ball->vy;
-        $this->ball->vx *= 0.98;
-        $this->ball->vy *= 0.98;
 
-        $this->ball->y = max(10, min($this->height - 10, $this->ball->y));
+        // owner keeps ball
+        if ($this->currentPlayerWithBall) {
+            $this->ball->x = $this->currentPlayerWithBall->x;
+            $this->ball->y = $this->currentPlayerWithBall->y;
+        } else {
+            $this->ball->x += $this->ball->vx;
+            $this->ball->y += $this->ball->vy;
+            $this->ball->vx *= 0.98;
+            $this->ball->vy *= 0.98;
+        }
+
+        $this->ball->x = max(10, min($this->width - 10, $this->ball->x));
 
         $ballOffset = $this->PLAYER_SIZE * 0.5 + 3;
 
@@ -112,13 +126,33 @@ class MatchSimulation
                 $this->ball->x < ($this->width + $this->GOAL_SIZE) / 2){
                 if($this->ball->y < $ballOffset){
                     $this->log("Team B do a goal");
+                    $this->summary->goalsB++;
+                    if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == "Team B"){
+                        $this->lastPlayerWithBall->summary->goals++;
+                        $this->lastPlayerWithBall = null;
+                    }
                 } else {
                     $this->log("Team A do a goal");
+                    $this->summary->goalsA++;
+                    if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == "Team A"){
+                        $this->lastPlayerWithBall->summary->goals++;
+                        $this->lastPlayerWithBall = null;
+                    }
                 }
             } else {
                 $this->log("reset ball");
             }
             $this->resetBall();
+        }
+
+        // get owner
+        $this->currentPlayerWithBall = $this->findBallOwner();
+        if($this->currentPlayerWithBall){
+            if($this->currentPlayerWithBall->team === "Team A"){
+                $this->summary->possessionA += $dt;
+            } else {
+                $this->summary->possessionB += $dt;
+            }
         }
 
         // PLAYER LOGIC
@@ -130,11 +164,19 @@ class MatchSimulation
                 "fieldHeight" => $this->height,
                 "teammates" => array_values(array_filter($this->players, fn($p) => $p->team === $player->team && $p !== $player)),
                 "opponents" => array_values(array_filter($this->players, fn($p) => $p->team !== $player->team && $p->bodyCooldown <= 0)),
-                "ballTeam" => ($this->findBallOwner()?->team ?? null)
+                "ballTeam" => ($this->currentPlayerWithBall?->team ?? null)
             ];
 
             $player->checkMarked($simState["opponents"], $this->PLAYER_SIZE * 1.5);
             $player->checkOpponentNear($simState["opponents"], $this->PLAYER_SIZE * 3);
+
+            if($player->marked){
+                if($player->team === $simState['ballTeam']){
+                    $player->summary->timeMarkedWithPossession += $dt;
+                } else {
+                    $player->summary->timeMarkedWithoutPossession += $dt;
+                }
+            }
 
             $action = $player->decide($simState);
 
@@ -143,6 +185,7 @@ class MatchSimulation
                 $simState,
                 function ($pos) use ($player){
                     // passToCB
+                    $this->lastPlayerWithBall = $player;
                     $dx = $pos["x"] - $this->ball->x;
                     $dy = $pos["y"] - $this->ball->y;
                     $dist = sqrt($dx*$dx + $dy*$dy);
@@ -151,6 +194,7 @@ class MatchSimulation
                     $this->log("{$player->team} {$player->name} pass the ball");
                 },
                 function ($team) use ($player) {
+                    $this->lastPlayerWithBall = $player;
                     // shootToCB
                     $target = [
                         "x" => (($this->width + $this->GOAL_SIZE) * 0.5) - rand(0, $this->GOAL_SIZE),
@@ -204,6 +248,8 @@ class MatchSimulation
             "logs" => $this->logs
         ];
         $this->logs = [];
+
+        $this->summary->totalTime += $dt;
     }
 
     private function resetBall()
@@ -216,7 +262,8 @@ class MatchSimulation
         foreach ($this->players as $p) {
             $p->hasBall = false;
         }
-
+        $this->currentPlayerWithBall = null;
+        $this->lastPlayerWithBall = null;
         $this->ballOwnerTeam = "";
     }
 
@@ -234,6 +281,7 @@ class MatchSimulation
         $this->ball->vx = ($dx / $dist) * $force;
         $this->ball->vy = ($dy / $dist) * $force;
 
+        $this->currentPlayerWithBall = null;
         $this->ballOwnerTeam = "";
     }
 
@@ -261,11 +309,10 @@ class MatchSimulation
 
         $nearPlayers = array_values($nearPlayers);
 
-        $currentOwner = $this->findBallOwner();
 
-        if ($currentOwner) {
-            // same as JS: challenges, steals, bounces
-            $this->resolveOwnerChallenge($currentOwner, $nearPlayers);
+        if ($this->currentPlayerWithBall) {
+            // challenges, steals, bounces
+            $this->resolveOwnerChallenge($nearPlayers);
             return;
         }
 
@@ -274,7 +321,7 @@ class MatchSimulation
 
         $sameTeam = array_reduce($nearPlayers, fn($c,$p)=> $c && $p->team === $nearPlayers[0]->team, true);
 
-        if ($sameTeam) {
+        if ($sameTeam) { // all near players are in same team
             $newOwner = $nearPlayers[array_rand($nearPlayers)];
 
             $ballSpeed = hypot($this->ball->vx, $this->ball->vy);
@@ -287,6 +334,12 @@ class MatchSimulation
 
                 $newOwner->ballCooldown = self::BALLCOOLDOWN_FAILED_CONTROL;
                 $this->log("{$newOwner->team} {$newOwner->name} failed to control fast ball");
+                if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team != $newOwner->team){
+                    $this->lastPlayerWithBall = null;
+                }
+
+                $newOwner->summary->interceptedBalls++;
+
             } else {
                 $newOwner->hasBall = true;
                 $this->ball->x = $newOwner->x;
@@ -296,10 +349,21 @@ class MatchSimulation
 
                 $this->ballOwnerTeam = $newOwner->team;
                 $this->log("{$newOwner->team} {$newOwner->name} take ball");
+
+                if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == $newOwner->team){
+                    $this->lastPlayerWithBall->summary->passesAchieved;
+                }
+                $newOwner->summary->controledBalls++;
+
+                $this->currentPlayerWithBall = $newOwner;
+                $this->lastPlayerWithBall = null;
             }
 
         } else {
-            foreach ($nearPlayers as $p) $p->ballCooldown = self::BALLCOOLDOWN_BALL_DISPUTED;
+            foreach ($nearPlayers as $p){
+                $p->ballCooldown = self::BALLCOOLDOWN_BALL_DISPUTED;
+            }
+            $this->lastPlayerWithBall = null;
 
             $this->applyForceToBall([
                 "x" => $this->ball->x + (rand(-100,100)),
@@ -310,17 +374,17 @@ class MatchSimulation
         }
     }
 
-    private function resolveOwnerChallenge($owner, $nearPlayers)
+    private function resolveOwnerChallenge($nearPlayers)
     {
-        $opponents = array_filter($nearPlayers, fn($p)=> $p->team !== $owner->team);
+        $opponents = array_filter($nearPlayers, fn($p)=> $p->team !== $this->currentPlayerWithBall->team);
 
         foreach ($opponents as $op) {
             $chance = rand(0, 1000) / 1000;
 
-            if ($chance < 0.2) {
-                $owner->hasBall = false;
-                $owner->ballCooldown = self::BALLCOOLDOWN_BALL_STEAL;
-                $owner->bodyCooldown = self::BODYCOOLDOWN_FAIL_DEFENDING;
+            if ($chance < 0.2) { // steal ball 
+                $this->currentPlayerWithBall->hasBall = false;
+                $this->currentPlayerWithBall->ballCooldown = self::BALLCOOLDOWN_BALL_STEAL;
+                $this->currentPlayerWithBall->bodyCooldown = self::BODYCOOLDOWN_FAIL_DEFENDING;
 
                 $op->hasBall = true;
                 $this->ball->x = $op->x;
@@ -329,33 +393,61 @@ class MatchSimulation
                 $this->ball->vy = 0;
 
                 $this->ballOwnerTeam = $op->team;
-                $this->log("{$op->team} {$op->name} steal ball to {$owner->name}");
+                $this->log("{$op->team} {$op->name} steal ball to {$this->currentPlayerWithBall->name}");
+
+                $this->currentPlayerWithBall = $op;
+                $this->lastPlayerWithBall = null;
+
+                $op->summary->stealedBalls++;
+
                 return;
 
             } elseif ($chance < 0.5) {
-                $owner->hasBall = false;
-                $owner->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
+                $this->currentPlayerWithBall->hasBall = false;
+                $this->currentPlayerWithBall->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
                 $op->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
+
+                $this->log("{$op->team} {$op->name} take off ball to {$this->currentPlayerWithBall->name}");
 
                 $this->applyForceToBall([
                     "x" => $this->ball->x + rand(-100,100)*2,
                     "y" => $this->ball->y + rand(-100,100)*2
                 ], 4);
 
-                $this->log("{$op->team} {$op->name} take off ball to {$owner->name}");
+                $this->lastPlayerWithBall = null;
+
+                $op->summary->takedoffBalls++;
+
                 return;
 
             } else {
                 $op->ballCooldown = self::BALLCOOLDOWN_FAIL_DEFENDING;
                 $op->bodyCooldown = self::BODYCOOLDOWN_BALL_STEAL;
-                $this->log("{$op->team} {$op->name} fails defending {$owner->name}");
+                $this->log("{$op->team} {$op->name} fails defending {$this->currentPlayerWithBall->name}");
+
+                $this->currentPlayerWithBall->summary->dribbledBalls++;
             }
         }
+    }
 
-        // owner keeps ball
-        if ($owner->hasBall) {
-            $this->ball->x = $owner->x;
-            $this->ball->y = $owner->y;
+    public function getSummary(){
+        $teamA = [];
+        for($i = 0; $i < 3; $i++){
+            $teamA[] = $this->players[$i]->getSummary($this->summary->possessionA, $this->summary->totalTime - $this->summary->possessionA);
         }
+        $teamB = [];
+        for($i = 0; $i < 3; $i++){
+            $teamB[] = $this->players[$i]->getSummary($this->summary->possessionB, $this->summary->totalTime - $this->summary->possessionB);
+        }
+
+        return [
+            "GoalsA" => $this->summary->goalsA,
+            "GoalsB" => $this->summary->goalsB,
+            "totalTime" => $this->summary->totalTime,
+            "possessionA" => $this->summary->possessionA,
+            "possessionB" => $this->summary->possessionB,
+            "TeamA" => $teamA,
+            "TeamB" => $teamB
+        ];
     }
 }

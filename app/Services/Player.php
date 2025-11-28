@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Services\PlayerSummary;
+
 class Player
 {
     public string $team;
@@ -29,6 +31,8 @@ class Player
     public string $currentAction;
     public ?string $currentCondition = null;
 
+    public PlayerSummary $summary;
+
     public function __construct(array $config)
     {
         $this->team = $config['team'];
@@ -44,6 +48,8 @@ class Player
 
         $this->target = ['x' => $this->baseX, 'y' => $this->baseY];
         $this->currentAction = $this->defaultAction;
+
+        $this->summary = new PlayerSummary();
     }
 
     public function getRenderData(){
@@ -53,6 +59,25 @@ class Player
             'ballCooldown' => $this->ballCooldown,
             'bodyCooldown' => $this->bodyCooldown,
             'marked' => $this->marked,
+        ];
+    }
+
+    public function getSummary($teamWithBallTime, $teamWithoutBallTime){
+        return [
+            "name" => $this->name,
+            "distanceTraveled" => $this->summary->distanceTraveled,
+            "distanceTraveledWithBall" => $this->summary->distanceTraveledWithBall,
+            "timeMarkedWithPossession" => 100 * $this->summary->timeMarkedWithPossession / $teamWithBallTime,
+            "timeMarkedWithoutPossession" => 100 * $this->summary->timeMarkedWithoutPossession / $teamWithoutBallTime,
+            "passesMade" => $this->summary->passesMade,
+            "passesAchieved" => $this->summary->passesAchieved,
+            "shootMade" => $this->summary->shootMade,
+            "goals" => $this->summary->goals,
+            "stealedBalls" => $this->summary->stealedBalls,
+            "takedoffBalls" => $this->summary->takedoffBalls,
+            "dribbledBalls" => $this->summary->dribbledBalls,
+            "controledBalls" => $this->summary->controledBalls,
+            "interceptedBalls" => $this->summary->interceptedBalls
         ];
     }
 
@@ -147,9 +172,18 @@ class Player
             }
         }
 
-        // Apply movement
-        $this->x += $this->currentSpeed['vx'] * $dt;
-        $this->y += $this->currentSpeed['vy'] * $dt;
+        // ========= APPLY MOVEMENT =========
+        $moveX = $this->currentSpeed['vx'] * $dt;
+        $moveY = $this->currentSpeed['vy'] * $dt;
+
+        // Track distance traveled
+        $this->summary->distanceTraveled += hypot($moveX, $moveY);
+        if($this->hasBall){
+            $this->summary->distanceTraveledWithBall += hypot($moveX, $moveY);
+        }
+
+        $this->x += $moveX;
+        $this->y += $moveY;
     }
 
     /** Update marked status */
@@ -276,6 +310,7 @@ class Player
                         if (count($available) > 0) {
                             $target = $available[array_rand($available)];
                             $this->hasBall = false;
+                            $this->summary->passesMade++;
                             $passToCB(['x' => $target->x, 'y' => $target->y]);
                         }
                     }
@@ -285,6 +320,7 @@ class Player
             case "Shoot to goal":
                 if ($this->hasBall) {
                     $this->hasBall = false;
+                    $this->summary->shootMade++;
                     $shootToCB($this->team);
                 }
                 break;

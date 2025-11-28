@@ -17,7 +17,8 @@ class MatchController extends Controller
         }
 
         return response()->json([
-            "match" => $match->tickHistoric
+            "match" => $match->tickHistoric,
+            "summary" => $match->getSummary()
         ]);
     }
 }
