@@ -436,7 +436,7 @@ class MatchSimulation
             $teamA[] = $this->players[$i]->getSummary($this->summary->possessionA, $this->summary->totalTime - $this->summary->possessionA);
         }
         $teamB = [];
-        for($i = 0; $i < 3; $i++){
+        for($i = 3; $i < 6; $i++){
             $teamB[] = $this->players[$i]->getSummary($this->summary->possessionB, $this->summary->totalTime - $this->summary->possessionB);
         }
 
