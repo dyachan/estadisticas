@@ -30,7 +30,6 @@ class MatchSimulation
 
     public array $tickHistoric = [];
     public array $logs = [];
-    public string $ballOwnerTeam = "";
 
     public MatchSummary $summary;
 
@@ -264,7 +263,6 @@ class MatchSimulation
         }
         $this->currentPlayerWithBall = null;
         $this->lastPlayerWithBall = null;
-        $this->ballOwnerTeam = "";
     }
 
     // ------------------------------------------------------------------------------------
@@ -282,7 +280,6 @@ class MatchSimulation
         $this->ball->vy = ($dy / $dist) * $force;
 
         $this->currentPlayerWithBall = null;
-        $this->ballOwnerTeam = "";
     }
 
     private function findBallOwner()
@@ -347,11 +344,10 @@ class MatchSimulation
                 $this->ball->vx = 0;
                 $this->ball->vy = 0;
 
-                $this->ballOwnerTeam = $newOwner->team;
                 $this->log("{$newOwner->team} {$newOwner->name} take ball");
 
                 if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == $newOwner->team){
-                    $this->lastPlayerWithBall->summary->passesAchieved;
+                    $this->lastPlayerWithBall->summary->passesAchieved++;
                 }
                 $newOwner->summary->controledBalls++;
 
@@ -392,7 +388,6 @@ class MatchSimulation
                 $this->ball->vx = 0;
                 $this->ball->vy = 0;
 
-                $this->ballOwnerTeam = $op->team;
                 $this->log("{$op->team} {$op->name} steal ball to {$this->currentPlayerWithBall->name}");
 
                 $this->currentPlayerWithBall = $op;
