@@ -29,7 +29,7 @@ class MatchSimulation
     public ?Player $lastPlayerWithBall = null;
 
     public array $tickHistoric = [];
-    public array $logs = [];
+    public array $logs = []; // temporary for each tick
 
     public MatchSummary $summary;
 
@@ -124,18 +124,30 @@ class MatchSimulation
             if($this->ball->x > ($this->width - $this->GOAL_SIZE) / 2 && 
                 $this->ball->x < ($this->width + $this->GOAL_SIZE) / 2){
                 if($this->ball->y < $ballOffset){
-                    $this->log("Team B do a goal");
                     $this->summary->goalsB++;
-                    if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == "Team B"){
-                        $this->lastPlayerWithBall->summary->goals++;
-                        $this->lastPlayerWithBall = null;
+                    
+                    if(!$this->lastPlayerWithBall){
+                        $this->log("Team B get a goal");
+                    } else {
+                        if($this->lastPlayerWithBall->team == "Team B"){
+                            $this->log("Team B {$this->lastPlayerWithBall->name} do a goal");
+                            $this->lastPlayerWithBall->summary->goals++;
+                        } else {
+                            $this->log("Team B get an autogoal from {$this->lastPlayerWithBall->name}");
+                        }
                     }
                 } else {
-                    $this->log("Team A do a goal");
                     $this->summary->goalsA++;
-                    if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == "Team A"){
-                        $this->lastPlayerWithBall->summary->goals++;
-                        $this->lastPlayerWithBall = null;
+
+                    if(!$this->lastPlayerWithBall){
+                        $this->log("Team A get a goal");
+                    } else {
+                        if($this->lastPlayerWithBall->team == "Team A"){
+                            $this->log("Team A {$this->lastPlayerWithBall->name} do a goal");
+                            $this->lastPlayerWithBall->summary->goals++;
+                        } else {
+                            $this->log("Team A get an autogoal from {$this->lastPlayerWithBall->name}");
+                        }
                     }
                 }
             } else {
@@ -182,15 +194,15 @@ class MatchSimulation
             // EXECUTE ACTION
             $player->execute(
                 $simState,
-                function ($pos) use ($player){
+                function ($target) use ($player){
                     // passToCB
                     $this->lastPlayerWithBall = $player;
-                    $dx = $pos["x"] - $this->ball->x;
-                    $dy = $pos["y"] - $this->ball->y;
+                    $dx = $target->x - $this->ball->x;
+                    $dy = $target->y - $this->ball->y;
                     $dist = sqrt($dx*$dx + $dy*$dy);
-                    $this->applyForceToBall($pos, 2 + min($dist*0.01, 4));
+                    $this->applyForceToBall(['x' => $target->x, 'y' => $target->y], 2 + min($dist*0.01, 4));
                     $player->ballCooldown = self::BALLCOOLDOWN_PASS;
-                    $this->log("{$player->team} {$player->name} pass the ball");
+                    $this->log("{$player->team} {$player->name} pass the ball to {$target->name}");
                 },
                 function ($team) use ($player) {
                     $this->lastPlayerWithBall = $player;
@@ -376,8 +388,13 @@ class MatchSimulation
 
         foreach ($opponents as $op) {
             $chance = rand(0, 1000) / 1000;
+            $op->summary->challengedRivalWithBall++;
+            $this->currentPlayerWithBall->summary->challengedMeWithBall++;
 
             if ($chance < 0.2) { // steal ball 
+                $op->summary->stealedBalls++;
+                $this->currentPlayerWithBall->summary->dribbleFailed++;
+
                 $this->currentPlayerWithBall->hasBall = false;
                 $this->currentPlayerWithBall->ballCooldown = self::BALLCOOLDOWN_BALL_STEAL;
                 $this->currentPlayerWithBall->bodyCooldown = self::BODYCOOLDOWN_FAIL_DEFENDING;
@@ -393,11 +410,12 @@ class MatchSimulation
                 $this->currentPlayerWithBall = $op;
                 $this->lastPlayerWithBall = null;
 
-                $op->summary->stealedBalls++;
-
                 return;
 
             } elseif ($chance < 0.5) {
+                $op->summary->takedoffBalls++;
+                $this->currentPlayerWithBall->summary->dribbleFailed++;
+
                 $this->currentPlayerWithBall->hasBall = false;
                 $this->currentPlayerWithBall->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
                 $op->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
@@ -407,20 +425,18 @@ class MatchSimulation
                 $this->applyForceToBall([
                     "x" => $this->ball->x + rand(-100,100)*2,
                     "y" => $this->ball->y + rand(-100,100)*2
-                ], 4);
+                ], 4);    
 
                 $this->lastPlayerWithBall = null;
-
-                $op->summary->takedoffBalls++;
 
                 return;
 
             } else {
+                $this->currentPlayerWithBall->summary->dribbleFailed++;
+
                 $op->ballCooldown = self::BALLCOOLDOWN_FAIL_DEFENDING;
                 $op->bodyCooldown = self::BODYCOOLDOWN_BALL_STEAL;
                 $this->log("{$op->team} {$op->name} fails defending {$this->currentPlayerWithBall->name}");
-
-                $this->currentPlayerWithBall->summary->dribbledBalls++;
             }
         }
     }

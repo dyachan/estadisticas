@@ -67,17 +67,24 @@ class Player
             "name" => $this->name,
             "distanceTraveled" => $this->summary->distanceTraveled,
             "distanceTraveledWithBall" => $this->summary->distanceTraveledWithBall,
-            "timeMarkedWithPossession" => 100 * $this->summary->timeMarkedWithPossession / $teamWithBallTime,
-            "timeMarkedWithoutPossession" => 100 * $this->summary->timeMarkedWithoutPossession / $teamWithoutBallTime,
+            "timeMarkedWithPossession" => $teamWithBallTime > 0 ? 
+                100 * $this->summary->timeMarkedWithPossession / $teamWithBallTime : 0,
+            "timeMarkedWithoutPossession" => $teamWithoutBallTime > 0 ? 
+                100 * $this->summary->timeMarkedWithoutPossession / $teamWithoutBallTime : 0,
+            "controledBalls" => $this->summary->controledBalls,
+            "interceptedBalls" => $this->summary->interceptedBalls,
             "passesMade" => $this->summary->passesMade,
             "passesAchieved" => $this->summary->passesAchieved,
             "shootMade" => $this->summary->shootMade,
             "goals" => $this->summary->goals,
-            "stealedBalls" => $this->summary->stealedBalls,
             "takedoffBalls" => $this->summary->takedoffBalls,
-            "dribbledBalls" => $this->summary->dribbledBalls,
-            "controledBalls" => $this->summary->controledBalls,
-            "interceptedBalls" => $this->summary->interceptedBalls
+            "stealedBalls" => $this->summary->stealedBalls,
+            "challengedMeWithBall" => $this->summary->challengedMeWithBall,
+            "challengedRivalWithBall" => $this->summary->challengedRivalWithBall,
+            "takedoffBalls" => $this->summary->takedoffBalls,
+            "stealedBalls" => $this->summary->stealedBalls,
+            "dribbleFailed" => $this->summary->dribbleFailed,
+            "dribbleDone" => $this->summary->dribbleDone,
         ];
     }
 
@@ -311,7 +318,7 @@ class Player
                             $target = $available[array_rand($available)];
                             $this->hasBall = false;
                             $this->summary->passesMade++;
-                            $passToCB(['x' => $target->x, 'y' => $target->y]);
+                            $passToCB($target);
                         }
                     }
                 }
