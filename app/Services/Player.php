@@ -251,7 +251,7 @@ class Player
         switch ($this->currentAction) {
 
             case "Go to the ball":
-                $this->target = ['x' => $ball->x, 'y' => $ball->y];
+                $this->setTarget(['x' => $ball->x, 'y' => $ball->y], $simState);
                 break;
 
             case "Go to near rival":
@@ -268,29 +268,29 @@ class Player
                     }
 
                     if ($closest) {
-                        $this->target = ['x' => $closest->x, 'y' => $closest->y];
+                        $this->setTarget(['x' => $closest->x, 'y' => $closest->y], $simState);
                     }
                 }
                 break;
 
             case "Go to my goal":
                 $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
-                $this->target = ['x' => $fieldWidth / 2, 'y' => $goalY];
+                $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY], $simState);
                 break;
 
             case "Go to rival goal":
                 $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
-                $this->target = ['x' => $fieldWidth / 2, 'y' => $goalY];
+                $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY], $simState);
                 break;
 
             case "Go forward":
                 $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
-                $this->target = ['x' => $this->x, 'y' => $goalY];
+                $this->setTarget(['x' => $this->x, 'y' => $goalY], $simState);
                 break;
 
             case "Go back":
                 $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
-                $this->target = ['x' => $this->x, 'y' => $goalY];
+                $this->setTarget(['x' => $this->x, 'y' => $goalY], $simState);
                 break;
 
             case "Pass the ball":
@@ -337,20 +337,20 @@ class Player
                 $right = ['x' => $fieldWidth * (0.7+rand(1,20)/100), 'y' => $this->y];
 
                 if ($this->x >= $right['x']) {
-                    $this->target = $left;
+                    $this->setTarget($left, $simState);
                 } else if($this->x <= $left['x']) {
-                    $this->target = $right;
+                    $this->setTarget($right, $simState);
                 } else if($this->target == null){
                     if($this->x < $fieldWidth*0.5){
-                        $this->target = $right;
+                        $this->setTarget($right, $simState);
                     } else {
-                        $this->target = $left;
+                        $this->setTarget($left, $simState);
                     }
                 }
                 break;
 
             default:
-                $this->target = ['x' => $this->baseX, 'y' => $this->baseY];
+                $this->setTarget(['x' => $this->baseX, 'y' => $this->baseY], $simState);
                 break;
         }
     }
@@ -437,6 +437,39 @@ class Player
 
             default:
                 return false;
+        }
+    }
+
+    public function setTarget($target, $simState){
+        if(!$simState["ballChasers"][$this->team] || $simState["ballChasers"][$this->team] === $this){
+            $this->target = $target;
+        } else {
+            $chasser = $simState["ballChasers"][$this->team];
+            // target teammate distance
+            $dx = $target['x'] - $chasser->x;
+            $dy = $target['y'] - $chasser->y;
+            $targetTeammateDist = hypot($dx, $dy);
+
+            if($targetTeammateDist < $simState["assistDistance"]){ // assist player from distance
+                // chasser player vector
+                $vx = $this->x - $chasser->x;
+                $vy = $this->y - $chasser->y;
+                $len = hypot($vx, $vy);
+                if ($len === 0) {
+                    $vx = 1;
+                    $vy = 0;
+                    $len = 1;
+                }
+
+                // Normalizar y escalar
+                $vx /= $len;
+                $vy /= $len;
+
+                $this->target = [
+                    'x' => min($simState["fieldWidth"], max(0, $chasser->x + $vx * $simState["assistDistance"])),
+                    'y' => min($simState["fieldHeight"], max(0, $chasser->y + $vy * $simState["assistDistance"]))
+                ];
+            }
         }
     }
 }

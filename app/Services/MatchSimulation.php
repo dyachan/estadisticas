@@ -15,9 +15,13 @@ class MatchSimulation
     private const BALLCOOLDOWN_BALL_STEAL = 60;
     private const BODYCOOLDOWN_FAIL_DEFENDING = 70;
     private const BODYCOOLDOWN_BALL_STEAL = 70;
+    private const BODYOVERLAP_FACTOR = 0.6;
+    private const BODYMARKED_FACTOR = 1.5;
+    private const BODYNEAR_FACTOR = 3;
+    private const BODYASSIST_FACTOR = 2;
 
-    private float $PLAYER_SIZE = 38;
-    private float $GOAL_SIZE = 120;
+    private const PLAYER_SIZE = 38;
+    private const GOAL_SIZE = 120;
 
     public float $width;
     public float $height;
@@ -117,12 +121,12 @@ class MatchSimulation
 
         $this->ball->x = max(10, min($this->width - 10, $this->ball->x));
 
-        $ballOffset = $this->PLAYER_SIZE * 0.5 + 3;
+        $ballOffset = self::PLAYER_SIZE * 0.5 + 3;
 
         // Check goal / reset
         if ($this->ball->y < $ballOffset || $this->ball->y > $this->height - $ballOffset) {
-            if($this->ball->x > ($this->width - $this->GOAL_SIZE) / 2 && 
-                $this->ball->x < ($this->width + $this->GOAL_SIZE) / 2){
+            if($this->ball->x > ($this->width - self::GOAL_SIZE) / 2 && 
+                $this->ball->x < ($this->width + self::GOAL_SIZE) / 2){
                 if($this->ball->y < $ballOffset){
                     $this->summary->goalsB++;
                     
@@ -168,18 +172,19 @@ class MatchSimulation
 
         // PLAYER LOGIC
         foreach ($this->players as $player) {
-
             $simState = [
                 "ball" => $this->ball,
                 "fieldWidth" => $this->width,
                 "fieldHeight" => $this->height,
                 "teammates" => array_values(array_filter($this->players, fn($p) => $p->team === $player->team && $p !== $player)),
                 "opponents" => array_values(array_filter($this->players, fn($p) => $p->team !== $player->team && $p->bodyCooldown <= 0)),
-                "ballTeam" => ($this->currentPlayerWithBall?->team ?? null)
+                "ballTeam" => ($this->currentPlayerWithBall?->team ?? null),
+                "ballChasers" => $this->selectBallChasers(),
+                "assistDistance" => self::PLAYER_SIZE * self::BODYASSIST_FACTOR
             ];
-
-            $player->checkMarked($simState["opponents"], $this->PLAYER_SIZE * 1.5);
-            $player->checkOpponentNear($simState["opponents"], $this->PLAYER_SIZE * 3);
+            
+            $player->checkMarked($simState["opponents"], self::PLAYER_SIZE * self::BODYMARKED_FACTOR);
+            $player->checkOpponentNear($simState["opponents"], self::PLAYER_SIZE * self::BODYNEAR_FACTOR);
 
             if($player->marked){
                 if($player->team === $simState['ballTeam']){
@@ -208,7 +213,7 @@ class MatchSimulation
                     $this->lastPlayerWithBall = $player;
                     // shootToCB
                     $target = [
-                        "x" => (($this->width + $this->GOAL_SIZE) * 0.5) - rand(0, $this->GOAL_SIZE),
+                        "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE),
                         "y" => ($team === "Team A" ? $this->height : 0)
                     ];
                     $this->applyForceToBall($target, 10);
@@ -219,7 +224,7 @@ class MatchSimulation
 
             $player->update($dt);
 
-            // PLAYER COLLISIONS
+            // PLAYER COLLISIONS AND DISTANCE
             foreach ($this->players as $other) {
                 if ($other === $player || $other->bodyCooldown > 0) continue;
 
@@ -227,8 +232,8 @@ class MatchSimulation
                 $dy = $player->y - $other->y;
                 $dist = sqrt($dx*$dx + $dy*$dy);
 
-                if ($dist < $this->PLAYER_SIZE * 0.6 && $dist > 0) {
-                    $overlap = $this->PLAYER_SIZE * 0.6 - $dist;
+                if ($dist < self::PLAYER_SIZE * self::BODYOVERLAP_FACTOR && $dist > 0) {
+                    $overlap = self::PLAYER_SIZE * self::BODYOVERLAP_FACTOR - $dist;
                     $player->x += ($dx / $dist) * ($overlap / 2);
                     $player->y += ($dy / $dist) * ($overlap / 2);
 
@@ -307,7 +312,7 @@ class MatchSimulation
     // ------------------------------------------------------------------------------------
     private function handleBallPossession()
     {
-        $CONTROL_DISTANCE = $this->PLAYER_SIZE;
+        $CONTROL_DISTANCE = self::PLAYER_SIZE;
 
         $nearPlayers = array_filter($this->players, function($p) use ($CONTROL_DISTANCE) {
             $dx = $p->x - $this->ball->x;
@@ -432,13 +437,40 @@ class MatchSimulation
                 return;
 
             } else {
-                $this->currentPlayerWithBall->summary->dribbleFailed++;
+                $this->currentPlayerWithBall->summary->dribbleDone++;
 
                 $op->ballCooldown = self::BALLCOOLDOWN_FAIL_DEFENDING;
                 $op->bodyCooldown = self::BODYCOOLDOWN_BALL_STEAL;
                 $this->log("{$op->team} {$op->name} fails defending {$this->currentPlayerWithBall->name}");
             }
         }
+    }
+
+    private function selectBallChasers(): array
+    {
+        $chasers = [];
+
+        foreach (['Team A', 'Team B'] as $team) {
+            $candidates = array_filter($this->players, fn($p) =>
+                $p->team === $team && $p->bodyCooldown <= 0 &&
+                in_array($p->currentAction, ["Go to the ball", "Go to near rival"])
+            );
+
+            if (empty($candidates)) {
+                $chasers[$team] = null;
+                continue;
+            }
+
+            usort($candidates, fn($a, $b) =>
+                hypot($a->x - $this->ball->x, $a->y - $this->ball->y)
+                <=>
+                hypot($b->x - $this->ball->x, $b->y - $this->ball->y)
+            );
+
+            $chasers[$team] = $candidates[0]; // el más cercano
+        }
+
+        return $chasers;
     }
 
     public function getSummary(){
