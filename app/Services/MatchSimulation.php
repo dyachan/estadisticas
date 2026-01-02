@@ -410,7 +410,7 @@ class MatchSimulation
                 $this->ball->vx = 0;
                 $this->ball->vy = 0;
 
-                $this->log("{$op->team} {$op->name} steal ball to {$this->currentPlayerWithBall->name}");
+                $this->log("{$op->team} {$op->name} steal to {$this->currentPlayerWithBall->name}");
 
                 $this->currentPlayerWithBall = $op;
                 $this->lastPlayerWithBall = null;
@@ -425,7 +425,7 @@ class MatchSimulation
                 $this->currentPlayerWithBall->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
                 $op->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
 
-                $this->log("{$op->team} {$op->name} take off ball to {$this->currentPlayerWithBall->name}");
+                $this->log("{$op->team} {$op->name} take off to {$this->currentPlayerWithBall->name}");
 
                 $this->applyForceToBall([
                     "x" => $this->ball->x + rand(-100,100)*2,
