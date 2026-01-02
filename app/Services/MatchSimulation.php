@@ -207,7 +207,7 @@ class MatchSimulation
                     $dist = sqrt($dx*$dx + $dy*$dy);
                     $this->applyForceToBall(['x' => $target->x, 'y' => $target->y], 2 + min($dist*0.01, 4));
                     $player->ballCooldown = self::BALLCOOLDOWN_PASS;
-                    $this->log("{$player->team} {$player->name} pass the ball to {$target->name}");
+                    $this->log("{$player->team} {$player->name} pass {$target->name}");
                 },
                 function ($team) use ($player) {
                     $this->lastPlayerWithBall = $player;
@@ -347,7 +347,7 @@ class MatchSimulation
                 $this->ball->vy = sin($angle) * $reb;
 
                 $newOwner->ballCooldown = self::BALLCOOLDOWN_FAILED_CONTROL;
-                $this->log("{$newOwner->team} {$newOwner->name} failed to control fast ball");
+                $this->log("{$newOwner->team} {$newOwner->name} failed control ball");
                 if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team != $newOwner->team){
                     $this->lastPlayerWithBall = null;
                 }
@@ -441,7 +441,7 @@ class MatchSimulation
 
                 $op->ballCooldown = self::BALLCOOLDOWN_FAIL_DEFENDING;
                 $op->bodyCooldown = self::BODYCOOLDOWN_BALL_STEAL;
-                $this->log("{$op->team} {$op->name} fails defending {$this->currentPlayerWithBall->name}");
+                $this->log("{$this->currentPlayerWithBall->team} {$this->currentPlayerWithBall->name} dribble {$op->name}");
             }
         }
     }
