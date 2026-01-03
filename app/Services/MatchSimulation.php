@@ -347,7 +347,7 @@ class MatchSimulation
                 $this->ball->vy = sin($angle) * $reb;
 
                 $newOwner->ballCooldown = self::BALLCOOLDOWN_FAILED_CONTROL;
-                $this->log("{$newOwner->team} {$newOwner->name} failed control ball");
+                $this->log("{$newOwner->team} {$newOwner->name} intercept ball");
                 if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team != $newOwner->team){
                     $this->lastPlayerWithBall = null;
                 }
@@ -361,7 +361,7 @@ class MatchSimulation
                 $this->ball->vx = 0;
                 $this->ball->vy = 0;
 
-                $this->log("{$newOwner->team} {$newOwner->name} take ball");
+                $this->log("{$newOwner->team} {$newOwner->name} control ball");
 
                 if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == $newOwner->team){
                     $this->lastPlayerWithBall->summary->passesAchieved++;
