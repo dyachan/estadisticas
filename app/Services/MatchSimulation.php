@@ -27,6 +27,7 @@ class MatchSimulation
     public float $height;
 
     public array $players = [];
+    public int $tickNumber = 0;
 
     public object $ball;
     public ?Player $currentPlayerWithBall = null;
@@ -106,6 +107,9 @@ class MatchSimulation
     // ------------------------------------------------------------------------------------
     public function update(float $dt = 1)
     {
+        // advance simulation tick
+        $this->tickNumber++;
+
         // BALL MOVEMENT
 
         // owner keeps ball
@@ -176,6 +180,7 @@ class MatchSimulation
                 "ball" => $this->ball,
                 "fieldWidth" => $this->width,
                 "fieldHeight" => $this->height,
+                "tick" => $this->tickNumber,
                 "teammates" => array_values(array_filter($this->players, fn($p) => $p->team === $player->team && $p !== $player)),
                 "opponents" => array_values(array_filter($this->players, fn($p) => $p->team !== $player->team && $p->bodyCooldown <= 0)),
                 "ballTeam" => ($this->currentPlayerWithBall?->team ?? null),
@@ -198,7 +203,6 @@ class MatchSimulation
 
             // EXECUTE ACTION
             $player->execute(
-                $simState,
                 function ($target) use ($player){
                     // passToCB
                     $this->lastPlayerWithBall = $player;
