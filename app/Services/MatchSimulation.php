@@ -82,7 +82,9 @@ class MatchSimulation
                 "baseX" => $this->width * $p["defaultZone"]["x"] / 100,
                 "baseY" => $this->height * $p["defaultZone"]["y"] / 100,
                 "defaultAction" => "Stay in my zone",
-                "currentFieldSide" => "bottom"
+                "currentFieldSide" => "bottom",
+                "scanWithBall" => $p["scanWithBall"] ?? null,
+                "scanWithoutBall" => $p["scanWithoutBall"] ?? null,
             ]);
         }
 
@@ -97,7 +99,9 @@ class MatchSimulation
                 "baseX" => $this->width * (100-$p["defaultZone"]["x"]) / 100,
                 "baseY" => $this->height * (100-$p["defaultZone"]["y"]) / 100,
                 "defaultAction" => "Stay in my zone",
-                "currentFieldSide" => "top"
+                "currentFieldSide" => "top",
+                "scanWithBall" => $p["scanWithBall"] ?? null,
+                "scanWithoutBall" => $p["scanWithoutBall"] ?? null,
             ]);
         }
     }

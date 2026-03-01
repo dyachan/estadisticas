@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\PlayerSummary;
+use App\Services\PlayerFormulas;
 
 /**
  * all player has a memory of where are others players and ball. near players are always updated. Away players must be scanned periodically
@@ -59,8 +60,9 @@ class Player
     // Tick when memory was last refreshed
     public int $memoryLastTick = -1;
 
-    // How many ticks to wait before refreshing memory (can be tuned)
-    public int $memoryRefreshPeriod = 300;
+    // How many ticks to wait before refreshing memory depending on ball possession
+    public int $memoryRefreshPeriodWithBall = 300;
+    public int $memoryRefreshPeriodWithoutBall = 300;
 
     public function __construct(array $config)
     {
@@ -79,9 +81,12 @@ class Player
         $this->currentAction = $this->defaultAction;
 
         $this->summary = new PlayerSummary();
-        // if (isset($config['memoryRefreshPeriod'])) {
-        //     $this->memoryRefreshPeriod = (int)$config['memoryRefreshPeriod'];
-        // }
+        if (isset($config['scanWithBall'])) {
+            $this->memoryRefreshPeriodWithBall = PlayerFormulas::scanPeriodWithBall($config['scanWithBall']);
+        }
+        if (isset($config['scanWithoutBall'])) {
+            $this->memoryRefreshPeriodWithoutBall = PlayerFormulas::scanPeriodWithoutBall($config['scanWithoutBall']);
+        }
     }
 
     /** Update cached memory from a fresh simState and record tick */
@@ -277,7 +282,8 @@ class Player
         $this->memory['ballChasers'] = $simState['ballChasers'];
         $this->memory['assistDistance'] = $simState['assistDistance'];
         if ($tick !== null) {
-            $shouldRefresh = ($this->memoryLastTick < 0) || ($tick - $this->memoryLastTick >= (0.5+rand(0, 10000) / 20000)*$this->memoryRefreshPeriod);
+            $period = $this->hasBall ? $this->memoryRefreshPeriodWithBall : $this->memoryRefreshPeriodWithoutBall;
+            $shouldRefresh = ($this->memoryLastTick < 0) || ($tick - $this->memoryLastTick >= (0.5+rand(0, 10000) / 20000)*$period);
             if ($shouldRefresh) {
                 $this->refreshMemory($simState, $tick);
             } else {
