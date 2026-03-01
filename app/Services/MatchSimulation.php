@@ -17,7 +17,7 @@ class MatchSimulation
     private const BODYCOOLDOWN_BALL_STEAL = 70;
     private const BODYOVERLAP_FACTOR = 0.6;
     private const BODYMARKED_FACTOR = 1.5;
-    private const BODYNEAR_FACTOR = 3;
+    private const BODYNEAR_FACTOR = 2;
     private const BODYASSIST_FACTOR = 2;
 
     private const PLAYER_SIZE = 38;
@@ -85,6 +85,13 @@ class MatchSimulation
                 "currentFieldSide" => "bottom",
                 "scanWithBall" => $p["scanWithBall"] ?? null,
                 "scanWithoutBall" => $p["scanWithoutBall"] ?? null,
+                "maxSpeed" => $p["maxSpeed"] ?? null,
+                "accuracy" => $p["accuracy"] ?? null,
+                "control" => $p["control"] ?? null,
+                "reaction" => $p["reaction"] ?? null,
+                "dribble" => $p["dribble"] ?? null,
+                "strength" => $p["strength"] ?? null,
+                "endurance" => $p["endurance"] ?? null,
             ]);
         }
 
@@ -102,6 +109,13 @@ class MatchSimulation
                 "currentFieldSide" => "top",
                 "scanWithBall" => $p["scanWithBall"] ?? null,
                 "scanWithoutBall" => $p["scanWithoutBall"] ?? null,
+                "maxSpeed" => $p["maxSpeed"] ?? null,
+                "accuracy" => $p["accuracy"] ?? null,
+                "control" => $p["control"] ?? null,
+                "reaction" => $p["reaction"] ?? null,
+                "dribble" => $p["dribble"] ?? null,
+                "strength" => $p["strength"] ?? null,
+                "endurance" => $p["endurance"] ?? null,
             ]);
         }
     }
@@ -208,23 +222,29 @@ class MatchSimulation
             // EXECUTE ACTION
             $player->execute(
                 function ($target) use ($player){
-                    // passToCB
+                    // passToCB — accuracy adds random deviation; strength scales pass force
                     $this->lastPlayerWithBall = $player;
-                    $dx = $target->x - $this->ball->x;
-                    $dy = $target->y - $this->ball->y;
+                    $dev = $player->accuracyDeviation;
+                    $targetX = $target->x + (rand(-1000, 1000) / 1000) * $dev;
+                    $targetY = $target->y + (rand(-1000, 1000) / 1000) * $dev;
+                    $dx = $targetX - $this->ball->x;
+                    $dy = $targetY - $this->ball->y;
                     $dist = sqrt($dx*$dx + $dy*$dy);
-                    $this->applyForceToBall(['x' => $target->x, 'y' => $target->y], 2 + min($dist*0.01, 4));
+                    $force = (2 + min($dist * 0.01, 4)) * (0.5 + 0.5 * $player->currentStrength);
+                    $this->applyForceToBall(['x' => $targetX, 'y' => $targetY], $force);
                     $player->ballCooldown = self::BALLCOOLDOWN_PASS;
                     $this->log("{$player->team} {$player->name} pass {$target->name}");
                 },
                 function ($team) use ($player) {
+                    // shootToCB — accuracy adds random deviation; strength scales shot force
                     $this->lastPlayerWithBall = $player;
-                    // shootToCB
+                    $dev = $player->accuracyDeviation;
                     $target = [
-                        "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE),
+                        "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE) + (rand(-1000, 1000) / 1000) * $dev,
                         "y" => ($team === "Team A" ? $this->height : 0)
                     ];
-                    $this->applyForceToBall($target, 10);
+                    $force = 10 * (0.5 + 0.5 * $player->currentStrength);
+                    $this->applyForceToBall($target, $force);
                     $player->ballCooldown = self::BALLCOOLDOWN_SHOOT;
                     $this->log("{$player->team} {$player->name} shoot to goal");
                 }
@@ -348,7 +368,7 @@ class MatchSimulation
 
             $ballSpeed = hypot($this->ball->vx, $this->ball->vy);
 
-            if ($ballSpeed > 6.0) {
+            if ($ballSpeed > $newOwner->controlSpeedThreshold) {
                 $angle = rand(0, 10000) / 10000 * 2 * M_PI;
                 $reb = $ballSpeed * 0.3;
                 $this->ball->vx = cos($angle) * $reb;
@@ -404,7 +424,15 @@ class MatchSimulation
             $op->summary->challengedRivalWithBall++;
             $this->currentPlayerWithBall->summary->challengedMeWithBall++;
 
-            if ($chance < 0.2) { // steal ball 
+            // Thresholds shift based on defender reaction vs attacker dribble.
+            // netFactor > 0: defender has edge; netFactor < 0: attacker has edge.
+            // Tired attacker (low currentStrength) is easier to rob.
+            $netFactor = $op->reactionFactor - $this->currentPlayerWithBall->dribbleFactor;
+            $strengthPenalty = (1.0 - $this->currentPlayerWithBall->currentStrength) * 0.1;
+            $stealThreshold   = max(0.02, min(0.45, 0.20 + $netFactor * 0.3 + $strengthPenalty));
+            $takeoffThreshold = max($stealThreshold + 0.1, min(0.90, 0.50 + $netFactor * 0.3 + $strengthPenalty));
+
+            if ($chance < $stealThreshold) { // steal ball
                 $op->summary->stealedBalls++;
                 $this->currentPlayerWithBall->summary->dribbleFailed++;
 
@@ -425,7 +453,7 @@ class MatchSimulation
 
                 return;
 
-            } elseif ($chance < 0.5) {
+            } elseif ($chance < $takeoffThreshold) {
                 $op->summary->takedoffBalls++;
                 $this->currentPlayerWithBall->summary->dribbleFailed++;
 
@@ -438,7 +466,7 @@ class MatchSimulation
                 $this->applyForceToBall([
                     "x" => $this->ball->x + rand(-100,100)*2,
                     "y" => $this->ball->y + rand(-100,100)*2
-                ], 4);    
+                ], 4);
 
                 $this->lastPlayerWithBall = null;
 

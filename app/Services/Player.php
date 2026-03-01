@@ -6,16 +6,19 @@ use App\Services\PlayerSummary;
 use App\Services\PlayerFormulas;
 
 /**
- * all player has a memory of where are others players and ball. near players are always updated. Away players must be scanned periodically
- * player:
- * - scan period with / without ball
- * - strength (when run strength is each time less, so max speed and reaction are slowest, also max force to pass and shoot, also is easiest to push)
- * - endurance (time to recover strength and cooldowns)
- * - max speed / aceleration
- * - accuracy (pass and shots target)
- * - control (speed umbral to control ball)
- * - reaction (max chance to steel ball)
- * - dribble (max chance to keep ball after a dispute)
+ * All players have a memory of where other players and the ball are.
+ * Near players are always updated; away players are scanned periodically.
+ *
+ * Player stats (0.0–1.0 normalized, passed via config):
+ * - scanWithBall / scanWithoutBall : how often memory is refreshed
+ * - strength    : depletion rate when running; affects effective max speed,
+ *                 pass/shoot force, and resistance to ball loss in challenges
+ * - endurance   : currentStrength recovery rate per tick
+ * - maxSpeed    : base maximum movement speed
+ * - accuracy    : pass and shot targeting precision (higher = less deviation)
+ * - control     : ball speed threshold for successful ball control
+ * - reaction    : chance to steal the ball during a challenge (as defender)
+ * - dribble     : resistance to ball loss during a challenge (as attacker)
  */
 class Player
 {
@@ -38,6 +41,14 @@ class Player
     public float $bodyCooldown = 0;
 
     public float $maxSpeed = 2.0;
+    public float $accuracyDeviation = 40.0;      // pixels of random deviation on pass/shot targets
+    public float $controlSpeedThreshold = 6.0;   // max ball speed at which this player can take possession
+    public float $reactionFactor = 0.5;           // defender steal factor (0–1)
+    public float $dribbleFactor = 0.5;            // attacker keep-ball factor (0–1)
+    public float $strengthDepletionRate = 0.0005; // currentStrength lost per unit of distance moved
+    public float $enduranceRecoveryRate = 0.00025;// currentStrength recovered per tick
+    public float $currentStrength = 1.0;          // runtime resource (0–1); depletes when running
+
     public array $currentSpeed = ['vx' => 0, 'vy' => 0];
     public ?array $target = null;
 
@@ -87,6 +98,27 @@ class Player
         if (isset($config['scanWithoutBall'])) {
             $this->memoryRefreshPeriodWithoutBall = PlayerFormulas::scanPeriodWithoutBall($config['scanWithoutBall']);
         }
+        if (isset($config['maxSpeed'])) {
+            $this->maxSpeed = PlayerFormulas::maxSpeed($config['maxSpeed']);
+        }
+        if (isset($config['accuracy'])) {
+            $this->accuracyDeviation = PlayerFormulas::accuracyDeviation($config['accuracy']);
+        }
+        if (isset($config['control'])) {
+            $this->controlSpeedThreshold = PlayerFormulas::controlSpeedThreshold($config['control']);
+        }
+        if (isset($config['reaction'])) {
+            $this->reactionFactor = PlayerFormulas::reactionFactor($config['reaction']);
+        }
+        if (isset($config['dribble'])) {
+            $this->dribbleFactor = PlayerFormulas::dribbleFactor($config['dribble']);
+        }
+        if (isset($config['strength'])) {
+            $this->strengthDepletionRate = PlayerFormulas::strengthDepletionRate($config['strength']);
+        }
+        if (isset($config['endurance'])) {
+            $this->enduranceRecoveryRate = PlayerFormulas::enduranceRecoveryRate($config['endurance']);
+        }
     }
 
     /** Update cached memory from a fresh simState and record tick */
@@ -111,6 +143,7 @@ class Player
             'ballCooldown' => $this->ballCooldown,
             'bodyCooldown' => $this->bodyCooldown,
             'marked' => $this->marked,
+            'currentStrength' => $this->currentStrength,
         ];
     }
 
@@ -156,6 +189,9 @@ class Player
         if ($this->bodyCooldown > 0) {
             $this->bodyCooldown -= $dt;
         }
+
+        // Recover strength over time (endurance determines recovery speed)
+        $this->currentStrength = min(1.0, $this->currentStrength + $this->enduranceRecoveryRate * $dt);
 
         $this->moveToward($dt);
     }
@@ -205,8 +241,11 @@ class Player
         $dirX = $dx / $dist;
         $dirY = $dy / $dist;
 
+        // Strength reduces effective max speed (40% floor when fully exhausted)
+        $effectiveMaxSpeed = $this->maxSpeed * (0.4 + 0.6 * $this->currentStrength);
+
         // ----- X axis -----
-        $desiredVx = $dirX * $this->maxSpeed;
+        $desiredVx = $dirX * $effectiveMaxSpeed;
         $changingDirX = $this->sign($this->currentSpeed['vx']) !== $this->sign($desiredVx)
                         && abs($this->currentSpeed['vx']) > 0.1;
 
@@ -219,7 +258,7 @@ class Player
         }
 
         // ----- Y axis -----
-        $desiredVy = $dirY * $this->maxSpeed;
+        $desiredVy = $dirY * $effectiveMaxSpeed;
         $changingDirY = $this->sign($this->currentSpeed['vy']) !== $this->sign($desiredVy)
                         && abs($this->currentSpeed['vy']) > 0.1;
 
@@ -235,11 +274,13 @@ class Player
         $moveX = $this->currentSpeed['vx'] * $dt;
         $moveY = $this->currentSpeed['vy'] * $dt;
 
-        // Track distance traveled
-        $this->summary->distanceTraveled += hypot($moveX, $moveY);
-        if($this->hasBall){
-            $this->summary->distanceTraveledWithBall += hypot($moveX, $moveY);
+        // Track distance traveled and deplete strength accordingly
+        $movedDist = hypot($moveX, $moveY);
+        $this->summary->distanceTraveled += $movedDist;
+        if ($this->hasBall) {
+            $this->summary->distanceTraveledWithBall += $movedDist;
         }
+        $this->currentStrength = max(0.0, $this->currentStrength - $this->strengthDepletionRate * $movedDist);
 
         $this->x += $moveX;
         $this->y += $moveY;
