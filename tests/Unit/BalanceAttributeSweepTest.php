@@ -30,6 +30,25 @@ class BalanceAttributeSweepTest extends BalanceTestCase
     private const COLLAPSE_POSSESSION = 0.82;
     private const COLLAPSE_GOAL_SHARE = 0.82;
 
+    /**
+     * Rule set used exclusively by the scanWithBall test.
+     * Carrier tries to pass first; this forces decision-making to rely on
+     * memory of teammate marked-status, making scanWithBall measurable.
+     */
+    private const PASS_FIRST_RULES = [
+        [   // rules[0]: our team has ball
+            ['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'],
+            ['condition' => 'I has the ball',              'action' => 'Pass the ball'],
+            ['condition' => 'The ball is in my side',      'action' => 'Go forward'],
+            ['condition' => 'The ball is in other side',   'action' => 'Go forward'],
+        ],
+        [   // rules[1]: opponent has ball or no one has it
+            ['condition' => 'I am near a rival',           'action' => 'Go to near rival'],
+            ['condition' => 'The ball is in my side',      'action' => 'Go to the ball'],
+            ['condition' => 'The ball is in other side',   'action' => 'Go to the ball'],
+        ],
+    ];
+
     // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------
@@ -331,5 +350,136 @@ class BalanceAttributeSweepTest extends BalanceTestCase
 
         // Collapse check — if reaction team dominates possession, attribute is overpowered
         $this->assertNoCollapse($avg, 'reaction=1.0 vs dribble=1.0');
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. STRENGTH  (depletion attribute)
+    // -------------------------------------------------------------------------
+
+    /**
+     * High-strength team (strength=1.0) vs low-strength team (strength=0.0).
+     * Both with endurance=0.0 (minimal recovery) to isolate strength from endurance.
+     *
+     * strength=1.0 → depletionRate = 0.0001/unit moved (10× slower than strength=0.0)
+     * strength=0.0 → depletionRate = 0.001/unit  moved
+     *
+     * effectiveMaxSpeed = maxSpeed * (STRENGTH_SPEED_FLOOR + (1−FLOOR) * currentStrength)
+     *   → exhausted player moves at 40% of their maxSpeed.
+     *
+     * With endurance=0.0 (recoveryRate ≈ 0.00005/tick) and ~2 units/tick:
+     *   strength=1.0: net depletion ≈ −0.00015/tick → exhausted after ~6 700 ticks
+     *   strength=0.0: net depletion ≈ −0.00195/tick → exhausted after  ~510 ticks
+     *
+     * Over 5 000 ticks the low-strength team runs at ~40% speed for most of the
+     * match while the high-strength team maintains near-full speed throughout.
+     *
+     * Directional metric: distanceTraveled.
+     */
+    public function test_strength_1v0_distance_advantage_over_long_match(): void
+    {
+        $hiStr = $this->makeTeam(['strength' => 1.0, 'endurance' => 0.0]);
+        $loStr = $this->makeTeam(['strength' => 0.0, 'endurance' => 0.0]);
+        $avg   = $this->sweep($hiStr, $loStr, matches: 5, ticks: 5000);
+
+        $distA = $avg['teamA']['distanceTraveled'];
+        $distB = $avg['teamB']['distanceTraveled'];
+
+        $this->assertGreaterThan(
+            $distB,
+            $distA,
+            sprintf('High-strength team (strength=1.0) should travel farther than '
+                . 'low-strength team (strength=0.0) when endurance=0.0. '
+                . 'Got A=%.0f vs B=%.0f.',
+                $distA, $distB)
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. SCAN WITH BALL  (memory refresh rate while carrying)
+    // -------------------------------------------------------------------------
+
+    /**
+     * High-scanWithBall team (scanWithBall=1.0) vs low-scanWithBall (scanWithBall=0.0),
+     * using PASS_FIRST_RULES where the carrier always tries to pass first.
+     *
+     * With ACTIVE_RULES alone, scanWithBall has no measurable effect because the
+     * carrier targets fixed goal coordinates (not memory-derived positions).
+     * PASS_FIRST_RULES make memory freshness matter: Player::execute("Pass the ball")
+     * filters teammates by !$p->marked.  Memory is updated for nearby players
+     * (within assistDistance), but far teammates only refresh on a full scan.
+     *
+     *   scanWithBall=1.0 → refresh every ~80 ticks  → carrier quickly sees when a
+     *                       far teammate shook off their marker → passes promptly.
+     *   scanWithBall=0.0 → refresh every ~800 ticks → carrier keeps seeing stale
+     *                       "marked=true" for far teammates → can't build the free-
+     *                       player pool → holds the ball idle until the next refresh.
+     *
+     * A stationary carrier is easier for opponents to dispossess, so Team B also
+     * loses the ball to challenges more often.
+     *
+     * Directional metric: passesAchieved — the passer's counter that increments
+     * when a same-team player successfully controls their kicked ball.
+     * 15 matches are used because the absolute pass count per match is low.
+     */
+    public function test_scanWithBall_1v0_achieves_more_passes(): void
+    {
+        $hiScan = $this->makeTeam(['scanWithBall' => 1.0], self::PASS_FIRST_RULES);
+        $loScan = $this->makeTeam(['scanWithBall' => 0.0], self::PASS_FIRST_RULES);
+        $avg    = $this->sweep($hiScan, $loScan, matches: 15);
+
+        $achievedA = $avg['teamA']['passesAchieved'];
+        $achievedB = $avg['teamB']['passesAchieved'];
+
+        $this->assertGreaterThan(
+            $achievedB,
+            $achievedA,
+            sprintf('High-scanWithBall team (scanWithBall=1.0) should complete more passes '
+                . 'than low-scanWithBall team (scanWithBall=0.0). '
+                . 'Got A=%.1f vs B=%.1f passesAchieved/match.',
+                $achievedA, $achievedB)
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. SCAN WITHOUT BALL  (memory refresh rate while not carrying)
+    // -------------------------------------------------------------------------
+
+    /**
+     * High-scanWithoutBall team (scanWithoutBall=1.0) vs low (scanWithoutBall=0.0).
+     *
+     * Non-carriers use "Go to the ball" which sets target = $this->memory->ball.
+     * The cached ball position is refreshed either on a full scan OR when the
+     * player is within assistDistance (76 px) of the real ball.
+     *
+     * After every goal or shot the ball resets to centre (fieldWidth/2, fieldHeight/2).
+     * Players far from centre have a stale ball position in memory:
+     *
+     *   scanWithoutBall=1.0 → refresh every ~60 ticks  → player redirects to centre
+     *                         within one scan cycle after the reset.
+     *   scanWithoutBall=0.0 → refresh every ~600 ticks → player keeps running to the
+     *                         old ball position for most of the reset cycle, arriving
+     *                         late to the new ball location.
+     *
+     * The fast-scan team wins the loose-ball race after each reset more consistently.
+     *
+     * Directional metric: controledBalls — direct count of successful ball pickups.
+     */
+    public function test_scanWithoutBall_1v0_controls_more_balls(): void
+    {
+        $hiScan = $this->makeTeam(['scanWithoutBall' => 1.0]);
+        $loScan = $this->makeTeam(['scanWithoutBall' => 0.0]);
+        $avg    = $this->sweep($hiScan, $loScan, matches: 10);
+
+        $controlsA = $avg['teamA']['controledBalls'];
+        $controlsB = $avg['teamB']['controledBalls'];
+
+        $this->assertGreaterThan(
+            $controlsB,
+            $controlsA,
+            sprintf('High-scanWithoutBall team (scanWithoutBall=1.0) should control more '
+                . 'balls than low-scanWithoutBall team (scanWithoutBall=0.0). '
+                . 'Got A=%.1f vs B=%.1f controledBalls/match.',
+                $controlsA, $controlsB)
+        );
     }
 }

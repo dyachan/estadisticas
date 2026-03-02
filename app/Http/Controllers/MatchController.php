@@ -12,7 +12,7 @@ class MatchController extends Controller
         $match = new MatchSimulation();
         $match->loadTeams($request->teamA, $request->teamB);
 
-        for ($i = 1; $i <= 5000; $i++) {
+        for ($i = 1; $i <= MatchSimulation::TICKS_PER_MATCH; $i++) {
             $match->update();
         }
 

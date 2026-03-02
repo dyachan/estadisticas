@@ -29,6 +29,8 @@ class MatchSimulation
     private const PLAYER_SIZE = 38;
     private const GOAL_SIZE = 120;
 
+    public const TICKS_PER_MATCH = 5000;
+
     public float $width;
     public float $height;
 

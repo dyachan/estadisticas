@@ -23,7 +23,7 @@ use App\Services\MatchSimulation;
  */
 abstract class BalanceTestCase extends TestCase
 {
-    protected const TICKS_PER_MATCH  = 2000;
+    protected const TICKS_PER_MATCH  = MatchSimulation::TICKS_PER_MATCH;
     protected const MATCHES_PER_SET  = 5;
 
     /**
