@@ -13,11 +13,11 @@ class PlayerFormulas
     // -------------------------------------------------------------------------
     // SCAN PERIOD
     // -------------------------------------------------------------------------
-    const SCAN_WITH_BALL_MIN = 50;   // ticks at value=1 (fast scan)
-    const SCAN_WITH_BALL_MAX = 600;  // ticks at value=0 (slow scan)
+    const SCAN_WITH_BALL_MIN = 80;   // ticks at value=1 (fast scan)
+    const SCAN_WITH_BALL_MAX = 800;  // ticks at value=0 (slow scan)
 
-    const SCAN_WITHOUT_BALL_MIN = 80;   // ticks at value=1
-    const SCAN_WITHOUT_BALL_MAX = 800;  // ticks at value=0
+    const SCAN_WITHOUT_BALL_MIN = 60;   // ticks at value=1
+    const SCAN_WITHOUT_BALL_MAX = 600;  // ticks at value=0
 
     public static function scanPeriodWithBall(float $value): int
     {

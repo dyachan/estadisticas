@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Services;
+use App\Services\Ball;
 use App\Services\Player;
+use App\Services\PlayerAction;
+use App\Services\PlayerMemory;
 use App\Services\MatchSummary;
 
 class MatchSimulation
@@ -29,7 +32,7 @@ class MatchSimulation
     public array $players = [];
     public int $tickNumber = 0;
 
-    public object $ball;
+    public Ball $ball;
     public ?Player $currentPlayerWithBall = null;
     public ?Player $lastPlayerWithBall = null;
 
@@ -43,12 +46,7 @@ class MatchSimulation
         $this->width = $width;
         $this->height = $height;
 
-        $this->ball = (object)[
-            "x" => $width / 2,
-            "y" => $height / 2,
-            "vx" => 0,
-            "vy" => 0
-        ];
+        $this->ball = new Ball($width / 2, $height / 2);
 
         $this->summary = new MatchSummary();
     }
@@ -71,6 +69,8 @@ class MatchSimulation
             ["x" => $this->width * 0.7, "y" => $this->height * 0.40],
         ];
 
+        $assistDistance = self::PLAYER_SIZE * self::BODYASSIST_FACTOR;
+
         // Team A
         foreach ($teamAData["players"] as $i => $p) {
             $this->players[] = new Player([
@@ -83,6 +83,9 @@ class MatchSimulation
                 "baseY" => $this->height * $p["defaultZone"]["y"] / 100,
                 "defaultAction" => "Stay in my zone",
                 "currentFieldSide" => "bottom",
+                "fieldWidth" => $this->width,
+                "fieldHeight" => $this->height,
+                "assistDistance" => $assistDistance,
                 "scanWithBall" => $p["scanWithBall"] ?? null,
                 "scanWithoutBall" => $p["scanWithoutBall"] ?? null,
                 "maxSpeed" => $p["maxSpeed"] ?? null,
@@ -107,6 +110,9 @@ class MatchSimulation
                 "baseY" => $this->height * (100-$p["defaultZone"]["y"]) / 100,
                 "defaultAction" => "Stay in my zone",
                 "currentFieldSide" => "top",
+                "fieldWidth" => $this->width,
+                "fieldHeight" => $this->height,
+                "assistDistance" => $assistDistance,
                 "scanWithBall" => $p["scanWithBall"] ?? null,
                 "scanWithoutBall" => $p["scanWithoutBall"] ?? null,
                 "maxSpeed" => $p["maxSpeed"] ?? null,
@@ -135,13 +141,10 @@ class MatchSimulation
             $this->ball->x = $this->currentPlayerWithBall->x;
             $this->ball->y = $this->currentPlayerWithBall->y;
         } else {
-            $this->ball->x += $this->ball->vx;
-            $this->ball->y += $this->ball->vy;
-            $this->ball->vx *= 0.98;
-            $this->ball->vy *= 0.98;
+            $this->ball->move();
         }
 
-        $this->ball->x = max(10, min($this->width - 10, $this->ball->x));
+        $this->ball->clampX(10, $this->width - 10);
 
         $ballOffset = self::PLAYER_SIZE * 0.5 + 3;
 
@@ -194,61 +197,32 @@ class MatchSimulation
 
         // PLAYER LOGIC
         foreach ($this->players as $player) {
-            $simState = [
-                "ball" => $this->ball,
-                "fieldWidth" => $this->width,
-                "fieldHeight" => $this->height,
-                "tick" => $this->tickNumber,
-                "teammates" => array_values(array_filter($this->players, fn($p) => $p->team === $player->team && $p !== $player)),
-                "opponents" => array_values(array_filter($this->players, fn($p) => $p->team !== $player->team && $p->bodyCooldown <= 0)),
-                "ballTeam" => ($this->currentPlayerWithBall?->team ?? null),
-                "ballChasers" => $this->selectBallChasers(),
-                "assistDistance" => self::PLAYER_SIZE * self::BODYASSIST_FACTOR
-            ];
-            
-            $player->checkMarked($simState["opponents"], self::PLAYER_SIZE * self::BODYMARKED_FACTOR);
-            $player->checkOpponentNear($simState["opponents"], self::PLAYER_SIZE * self::BODYNEAR_FACTOR);
+            $simState = new PlayerMemory();
+            $simState->ball = $this->ball;
+            $simState->tick = $this->tickNumber;
+            $simState->teammates = array_values(array_filter($this->players, fn($p) => $p->team === $player->team && $p !== $player));
+            $simState->opponents = array_values(array_filter($this->players, fn($p) => $p->team !== $player->team && $p->bodyCooldown <= 0));
+            $simState->ballTeam = $this->currentPlayerWithBall?->team ?? null;
+            $simState->ballChasers = $this->selectBallChasers();
+
+            $player->checkMarked($simState->opponents, self::PLAYER_SIZE * self::BODYMARKED_FACTOR);
+            $player->checkOpponentNear($simState->opponents, self::PLAYER_SIZE * self::BODYNEAR_FACTOR);
 
             if($player->marked){
-                if($player->team === $simState['ballTeam']){
+                if($player->team === $simState->ballTeam){
                     $player->summary->timeMarkedWithPossession += $dt;
                 } else {
                     $player->summary->timeMarkedWithoutPossession += $dt;
                 }
             }
 
-            $action = $player->decide($simState);
+            $player->decide($simState);
 
             // EXECUTE ACTION
-            $player->execute(
-                function ($target) use ($player){
-                    // passToCB — accuracy adds random deviation; strength scales pass force
-                    $this->lastPlayerWithBall = $player;
-                    $dev = $player->accuracyDeviation;
-                    $targetX = $target->x + (rand(-1000, 1000) / 1000) * $dev;
-                    $targetY = $target->y + (rand(-1000, 1000) / 1000) * $dev;
-                    $dx = $targetX - $this->ball->x;
-                    $dy = $targetY - $this->ball->y;
-                    $dist = sqrt($dx*$dx + $dy*$dy);
-                    $force = (2 + min($dist * 0.01, 4)) * (0.5 + 0.5 * $player->currentStrength);
-                    $this->applyForceToBall(['x' => $targetX, 'y' => $targetY], $force);
-                    $player->ballCooldown = self::BALLCOOLDOWN_PASS;
-                    $this->log("{$player->team} {$player->name} pass {$target->name}");
-                },
-                function ($team) use ($player) {
-                    // shootToCB — accuracy adds random deviation; strength scales shot force
-                    $this->lastPlayerWithBall = $player;
-                    $dev = $player->accuracyDeviation;
-                    $target = [
-                        "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE) + (rand(-1000, 1000) / 1000) * $dev,
-                        "y" => ($team === "Team A" ? $this->height : 0)
-                    ];
-                    $force = 10 * (0.5 + 0.5 * $player->currentStrength);
-                    $this->applyForceToBall($target, $force);
-                    $player->ballCooldown = self::BALLCOOLDOWN_SHOOT;
-                    $this->log("{$player->team} {$player->name} shoot to goal");
-                }
-            );
+            $action = $player->execute();
+            if ($action !== null) {
+                $this->resolvePlayerAction($player, $action);
+            }
 
             $player->update($dt);
 
@@ -298,10 +272,7 @@ class MatchSimulation
 
     private function resetBall()
     {
-        $this->ball->x = $this->width * 0.5;
-        $this->ball->y = $this->height * 0.5;
-        $this->ball->vx = 0;
-        $this->ball->vy = 0;
+        $this->ball->reset($this->width * 0.5, $this->height * 0.5);
 
         foreach ($this->players as $p) {
             $p->hasBall = false;
@@ -311,19 +282,44 @@ class MatchSimulation
     }
 
     // ------------------------------------------------------------------------------------
+    // PLAYER ACTION RESOLUTION
+    // ------------------------------------------------------------------------------------
+    private function resolvePlayerAction(Player $player, PlayerAction $action): void
+    {
+        $this->lastPlayerWithBall = $player;
+        $dev = $player->accuracyDeviation;
+
+        if ($action->type === PlayerAction::PASS) {
+            $target = $action->passTarget;
+            $targetX = $target->x + (rand(-1000, 1000) / 1000) * $dev;
+            $targetY = $target->y + (rand(-1000, 1000) / 1000) * $dev;
+            $dx = $targetX - $this->ball->x;
+            $dy = $targetY - $this->ball->y;
+            $dist = sqrt($dx * $dx + $dy * $dy);
+            $force = (2 + min($dist * 0.01, 4)) * (0.5 + 0.5 * $player->currentStrength);
+            $this->ball->applyForce(['x' => $targetX, 'y' => $targetY], $force);
+            $player->ballCooldown = self::BALLCOOLDOWN_PASS;
+            $this->log("{$player->team} {$player->name} pass {$target->name}");
+        } else { // SHOOT
+            $target = [
+                "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE) + (rand(-1000, 1000) / 1000) * $dev,
+                "y" => ($player->team === "Team A" ? $this->height : 0)
+            ];
+            $force = 10 * (0.5 + 0.5 * $player->currentStrength);
+            $this->ball->applyForce($target, $force);
+            $player->ballCooldown = self::BALLCOOLDOWN_SHOOT;
+            $this->log("{$player->team} {$player->name} shoot to goal");
+        }
+
+        $this->currentPlayerWithBall = null;
+    }
+
+    // ------------------------------------------------------------------------------------
     // BALL FORCE
     // ------------------------------------------------------------------------------------
     private function applyForceToBall($target, float $force)
     {
-        $dx = $target["x"] - $this->ball->x;
-        $dy = $target["y"] - $this->ball->y;
-        $dist = sqrt($dx*$dx + $dy*$dy);
-
-        if ($dist == 0) return;
-
-        $this->ball->vx = ($dx / $dist) * $force;
-        $this->ball->vy = ($dy / $dist) * $force;
-
+        $this->ball->applyForce($target, $force);
         $this->currentPlayerWithBall = null;
     }
 
@@ -425,12 +421,8 @@ class MatchSimulation
             $this->currentPlayerWithBall->summary->challengedMeWithBall++;
 
             // Thresholds shift based on defender reaction vs attacker dribble.
-            // netFactor > 0: defender has edge; netFactor < 0: attacker has edge.
-            // Tired attacker (low currentStrength) is easier to rob.
-            $netFactor = $op->reactionFactor - $this->currentPlayerWithBall->dribbleFactor;
-            $strengthPenalty = (1.0 - $this->currentPlayerWithBall->currentStrength) * 0.1;
-            $stealThreshold   = max(0.02, min(0.45, 0.20 + $netFactor * 0.3 + $strengthPenalty));
-            $takeoffThreshold = max($stealThreshold + 0.1, min(0.90, 0.50 + $netFactor * 0.3 + $strengthPenalty));
+            $stealThreshold = max(0.0, $op->reactionFactor - $this->currentPlayerWithBall->dribbleFactor / 2);
+            $takeoffThreshold = 1.0 - max(0.0, $this->currentPlayerWithBall->dribbleFactor - $op->reactionFactor / 2);
 
             if ($chance < $stealThreshold) { // steal ball
                 $op->summary->stealedBalls++;

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Services\PlayerAction;
+use App\Services\PlayerMemory;
 use App\Services\PlayerSummary;
 use App\Services\PlayerFormulas;
 
@@ -55,21 +57,12 @@ class Player
     public string $currentAction;
     public ?string $currentCondition = null;
 
-    public PlayerSummary $summary;
-    // Memory for simulated context
-    public array $memory = [
-        'ball' => null,
-        'teammates' => [],
-        'opponents' => [],
-        'fieldWidth' => null,
-        'fieldHeight' => null,
-        'ballTeam' => null,
-        'ballChasers' => [],
-        'assistDistance' => null,
-    ];
+    public float $fieldWidth;
+    public float $fieldHeight;
+    public float $assistDistance;
 
-    // Tick when memory was last refreshed
-    public int $memoryLastTick = -1;
+    public PlayerSummary $summary;
+    public PlayerMemory $memory;
 
     // How many ticks to wait before refreshing memory depending on ball possession
     public int $memoryRefreshPeriodWithBall = 300;
@@ -88,9 +81,14 @@ class Player
         $this->defaultAction = $config['defaultAction'];
         $this->currentFieldSide = $config['currentFieldSide'];
 
+        $this->fieldWidth = $config['fieldWidth'];
+        $this->fieldHeight = $config['fieldHeight'];
+        $this->assistDistance = $config['assistDistance'];
+
         $this->target = ['x' => $this->baseX, 'y' => $this->baseY];
         $this->currentAction = $this->defaultAction;
 
+        $this->memory = new PlayerMemory();
         $this->summary = new PlayerSummary();
         if (isset($config['scanWithBall'])) {
             $this->memoryRefreshPeriodWithBall = PlayerFormulas::scanPeriodWithBall($config['scanWithBall']);
@@ -122,18 +120,15 @@ class Player
     }
 
     /** Update cached memory from a fresh simState and record tick */
-    public function refreshMemory(array $simState, int $tick): void
+    public function refreshMemory(PlayerMemory $simState): void
     {
-        $this->memory['ball'] = $simState['ball'];
-        $this->memory['fieldWidth'] = $simState['fieldWidth'];
-        $this->memory['fieldHeight'] = $simState['fieldHeight'];
+        $this->memory->ball = $simState->ball;
         // store shallow copies of teammates/opponents (positions and flags)
-        $this->memory['teammates'] = array_map(fn($p) => (object)['x' => $p->x, 'y' => $p->y, 'name' => $p->name, 'marked' => $p->marked], $simState['teammates']);
-        $this->memory['opponents'] = array_map(fn($p) => (object)['x' => $p->x, 'y' => $p->y, 'name' => $p->name, 'marked' => $p->marked], $simState['opponents']);
-        $this->memory['ballTeam'] = $simState['ballTeam'];
-        $this->memory['ballChasers'] = $simState['ballChasers'];
-        $this->memory['assistDistance'] = $simState['assistDistance'];
-        $this->memoryLastTick = $tick;
+        $this->memory->teammates = array_map(fn($p) => (object)['x' => $p->x, 'y' => $p->y, 'name' => $p->name, 'marked' => $p->marked], $simState->teammates);
+        $this->memory->opponents = array_map(fn($p) => (object)['x' => $p->x, 'y' => $p->y, 'name' => $p->name, 'marked' => $p->marked], $simState->opponents);
+        $this->memory->ballTeam = $simState->ballTeam;
+        $this->memory->ballChasers = $simState->ballChasers;
+        $this->memory->tick = $simState->tick;
     }
 
     public function getRenderData(){
@@ -314,45 +309,40 @@ class Player
     }
 
     /** Evaluate rules */
-    public function decide(array $simState)
+    public function decide(PlayerMemory $simState)
     {
-        // If a tick is provided, let the player decide when to refresh its memory
-        $tick = $simState['tick'] ?? null;
+        // ballChasers are used for assist behavior, so we update them every tick to ensure good responsiveness
+        $this->memory->ballChasers = $simState->ballChasers;
 
-        // ballChasers and assistDistance are used for assist behavior, so we update them every tick to ensure good responsiveness
-        $this->memory['ballChasers'] = $simState['ballChasers'];
-        $this->memory['assistDistance'] = $simState['assistDistance'];
-        if ($tick !== null) {
-            $period = $this->hasBall ? $this->memoryRefreshPeriodWithBall : $this->memoryRefreshPeriodWithoutBall;
-            $shouldRefresh = ($this->memoryLastTick < 0) || ($tick - $this->memoryLastTick >= (0.5+rand(0, 10000) / 20000)*$period);
-            if ($shouldRefresh) {
-                $this->refreshMemory($simState, $tick);
-            } else {
-                // Use cached memory but update near ball and players
-                if($this->distanceTo($simState['ball']) < $simState['assistDistance']){
-                    $this->memory['ball'] = $simState['ball'];
+        $period = $this->hasBall ? $this->memoryRefreshPeriodWithBall : $this->memoryRefreshPeriodWithoutBall;
+        $shouldRefresh = ($this->memory->tick < 0) || ($simState->tick - $this->memory->tick >= (0.5+rand(0, 10000) / 20000)*$period);
+        if ($shouldRefresh) {
+            $this->refreshMemory($simState);
+        } else {
+            // Use cached memory but update near ball and players
+            if($this->distanceTo($simState->ball) < $this->assistDistance){
+                $this->memory->ball = $simState->ball;
+            }
+            // Update near teammates and opponents
+            foreach ($this->memory->teammates as $cachedMate) {
+                $realMate = array_values(array_filter($simState->teammates, fn($p) => $p->name === $cachedMate->name))[0] ?? null;
+                if ($realMate && $this->distanceTo($realMate) < $this->assistDistance) {
+                    $cachedMate->x = $realMate->x;
+                    $cachedMate->y = $realMate->y;
+                    $cachedMate->marked = $realMate->marked;
                 }
-                // Update near teammates and opponents
-                foreach ($this->memory['teammates'] as $cachedMate) {
-                    $realMate = array_values(array_filter($simState['teammates'], fn($p) => $p->name === $cachedMate->name))[0] ?? null;
-                    if ($realMate && $this->distanceTo($realMate) < $simState['assistDistance']) {
-                        $cachedMate->x = $realMate->x;
-                        $cachedMate->y = $realMate->y;
-                        $cachedMate->marked = $realMate->marked;
-                    }
-                }
-                foreach ($this->memory['opponents'] as $cachedOpp) {
-                    $realOpp = array_values(array_filter($simState['opponents'], fn($p) => $p->name === $cachedOpp->name))[0] ?? null;
-                    if ($realOpp && $this->distanceTo($realOpp) < $simState['assistDistance']) {
-                        $cachedOpp->x = $realOpp->x;
-                        $cachedOpp->y = $realOpp->y;
-                        $cachedOpp->marked = $realOpp->marked;
-                    }
+            }
+            foreach ($this->memory->opponents as $cachedOpp) {
+                $realOpp = array_values(array_filter($simState->opponents, fn($p) => $p->name === $cachedOpp->name))[0] ?? null;
+                if ($realOpp && $this->distanceTo($realOpp) < $this->assistDistance) {
+                    $cachedOpp->x = $realOpp->x;
+                    $cachedOpp->y = $realOpp->y;
+                    $cachedOpp->marked = $realOpp->marked;
                 }
             }
         }
 
-        $rulesForContext = $this->rules[$this->memory['ballTeam'] === $this->team ? 0 : 1];
+        $rulesForContext = $this->rules[$this->memory->ballTeam === $this->team ? 0 : 1];
 
         foreach ($rulesForContext as $rule) {
             if ($this->evaluateCondition($rule['condition'], $rule['action'], $this->memory)) {
@@ -367,14 +357,14 @@ class Player
         return $this->currentAction;
     }
 
-    /** Execute action */
-    public function execute(callable $passToCB, callable $shootToCB)
+    /** Execute action — returns a PlayerAction if the player passes or shoots, null otherwise */
+    public function execute(): ?PlayerAction
     {
-        $ball = $this->memory['ball'];
-        $teammates = $this->memory['teammates'];
-        $opponents = $this->memory['opponents'];
-        $fieldWidth = $this->memory['fieldWidth'];
-        $fieldHeight = $this->memory['fieldHeight'];
+        $ball = $this->memory->ball;
+        $teammates = $this->memory->teammates;
+        $opponents = $this->memory->opponents;
+        $fieldWidth = $this->fieldWidth;
+        $fieldHeight = $this->fieldHeight;
 
         switch ($this->currentAction) {
 
@@ -423,7 +413,6 @@ class Player
 
             case "Pass the ball":
                 if ($this->hasBall) {
-                    // Filter free teammates
                     $free = array_filter($teammates, fn($p) => !$p->marked);
 
                     if (count($free) > 0) {
@@ -446,7 +435,7 @@ class Player
                             $target = $available[array_rand($available)];
                             $this->hasBall = false;
                             $this->summary->passesMade++;
-                            $passToCB($target);
+                            return PlayerAction::pass($target);
                         }
                     }
                 }
@@ -456,7 +445,7 @@ class Player
                 if ($this->hasBall) {
                     $this->hasBall = false;
                     $this->summary->shootMade++;
-                    $shootToCB($this->team);
+                    return PlayerAction::shoot();
                 }
                 break;
 
@@ -481,6 +470,8 @@ class Player
                 $this->setTarget(['x' => $this->baseX, 'y' => $this->baseY], $this->memory);
                 break;
         }
+
+        return null;
     }
 
     /** Check pass interception */
@@ -514,12 +505,12 @@ class Player
     }
 
     /** Evaluate conditions */
-    public function evaluateCondition(string $cond, string $action, array $simState): bool
+    public function evaluateCondition(string $cond, string $action, PlayerMemory $simState): bool
     {
-        $ball = $simState['ball'];
-        $opponents = $simState['opponents'];
-        $fieldWidth = $simState['fieldWidth'];
-        $fieldHeight = $simState['fieldHeight'];
+        $ball = $simState->ball;
+        $opponents = $simState->opponents;
+        $fieldWidth = $this->fieldWidth;
+        $fieldHeight = $this->fieldHeight;
 
         if (in_array($action, ["Pass the ball", "Shoot to goal"]) && !$this->hasBall) {
             return false;
@@ -568,17 +559,17 @@ class Player
         }
     }
 
-    public function setTarget($target, $simState){
-        if(!$simState["ballChasers"][$this->team] || $simState["ballChasers"][$this->team] === $this){
+    public function setTarget($target, PlayerMemory $simState){
+        if(!$simState->ballChasers[$this->team] || $simState->ballChasers[$this->team] === $this){
             $this->target = $target;
         } else {
-            $chasser = $simState["ballChasers"][$this->team];
+            $chasser = $simState->ballChasers[$this->team];
             // target teammate distance
             $dx = $target['x'] - $chasser->x;
             $dy = $target['y'] - $chasser->y;
             $targetTeammateDist = hypot($dx, $dy);
 
-            if($targetTeammateDist < $simState["assistDistance"]){ // assist player from distance
+            if($targetTeammateDist < $this->assistDistance){ // assist player from distance
                 // chasser player vector
                 $vx = $this->x - $chasser->x;
                 $vy = $this->y - $chasser->y;
@@ -594,8 +585,8 @@ class Player
                 $vy /= $len;
 
                 $this->target = [
-                    'x' => min($simState["fieldWidth"], max(0, $chasser->x + $vx * $simState["assistDistance"])),
-                    'y' => min($simState["fieldHeight"], max(0, $chasser->y + $vy * $simState["assistDistance"]))
+                    'x' => min($this->fieldWidth, max(0, $chasser->x + $vx * $this->assistDistance)),
+                    'y' => min($this->fieldHeight, max(0, $chasser->y + $vy * $this->assistDistance))
                 ];
             }
         }
