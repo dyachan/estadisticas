@@ -23,6 +23,9 @@ class MatchSimulation
     private const BODYNEAR_FACTOR = 2;
     private const BODYASSIST_FACTOR = 2;
 
+    private const BALL_DISPUTED_FORCE = 3;
+    private const BALL_TAKEOFF_FORCE = 4;
+
     private const PLAYER_SIZE = 38;
     private const GOAL_SIZE = 120;
 
@@ -405,7 +408,7 @@ class MatchSimulation
             $this->applyForceToBall([
                 "x" => $this->ball->x + (rand(-100,100)),
                 "y" => $this->ball->y + (rand(-100,100))
-            ], 3);
+            ], self::BALL_DISPUTED_FORCE);
 
             $this->log("ball bounces away");
         }
@@ -458,7 +461,7 @@ class MatchSimulation
                 $this->applyForceToBall([
                     "x" => $this->ball->x + rand(-100,100)*2,
                     "y" => $this->ball->y + rand(-100,100)*2
-                ], 4);
+                ], self::BALL_TAKEOFF_FORCE);
 
                 $this->lastPlayerWithBall = null;
 

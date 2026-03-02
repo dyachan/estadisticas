@@ -64,6 +64,8 @@ class Player
     public PlayerSummary $summary;
     public PlayerMemory $memory;
 
+    private const STRENGTH_SPEED_FLOOR = 0.4; // min speed fraction when fully exhausted
+
     // How many ticks to wait before refreshing memory depending on ball possession
     public int $memoryRefreshPeriodWithBall = 300;
     public int $memoryRefreshPeriodWithoutBall = 300;
@@ -236,8 +238,8 @@ class Player
         $dirX = $dx / $dist;
         $dirY = $dy / $dist;
 
-        // Strength reduces effective max speed (40% floor when fully exhausted)
-        $effectiveMaxSpeed = $this->maxSpeed * (0.4 + 0.6 * $this->currentStrength);
+        // Strength reduces effective max speed (STRENGTH_SPEED_FLOOR when fully exhausted)
+        $effectiveMaxSpeed = $this->maxSpeed * (self::STRENGTH_SPEED_FLOOR + (1.0 - self::STRENGTH_SPEED_FLOOR) * $this->currentStrength);
 
         // ----- X axis -----
         $desiredVx = $dirX * $effectiveMaxSpeed;
