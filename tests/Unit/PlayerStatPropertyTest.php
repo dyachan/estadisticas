@@ -38,7 +38,7 @@ class PlayerStatPropertyTest extends TestCase
             'y'                => 300.0,
             'baseX'            => 200.0,
             'baseY'            => 300.0,
-            'defaultAction'    => 'Stay in my zone',
+            'defaultAction'    => \App\Services\PlayerRules::A_STAY_IN_ZONE, // "Stay in my zone"
             'currentFieldSide' => 'bottom',
             'fieldWidth'       => 400.0,
             'fieldHeight'      => 600.0,

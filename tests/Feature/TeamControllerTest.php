@@ -170,13 +170,13 @@ class TeamControllerTest extends TestCase
             'position_index' => 0,
             'slot'           => 'with_ball',
             'priority'       => 0,
-            'condition'      => 'I has the ball',
-            'action'         => 'Shoot to goal',
+            'condition'      => \App\Services\PlayerRules::C_HAS_BALL,  // "I has the ball"
+            'action'         => \App\Services\PlayerRules::A_SHOOT,     // "Shoot to goal"
         ])->assertOk()->assertJsonPath('success', true);
 
         $rule = $team->fresh()->configuration[0]['rules_with_ball'][0];
-        $this->assertEquals('I has the ball', $rule['condition']);
-        $this->assertEquals('Shoot to goal',  $rule['action']);
+        $this->assertEquals(\App\Services\PlayerRules::C_HAS_BALL, $rule['condition']);
+        $this->assertEquals(\App\Services\PlayerRules::A_SHOOT,    $rule['action']);
     }
 
     public function test_assign_rule_sets_without_ball_slot(): void
@@ -187,25 +187,30 @@ class TeamControllerTest extends TestCase
             'position_index' => 1,
             'slot'           => 'without_ball',
             'priority'       => 0,
-            'condition'      => 'The ball is in my side',
-            'action'         => 'Go to the ball',
+            'condition'      => \App\Services\PlayerRules::C_BALL_IN_MY_SIDE, // "The ball is in my side"
+            'action'         => \App\Services\PlayerRules::A_GO_TO_BALL,      // "Go to the ball"
         ])->assertOk();
 
         $rule = $team->fresh()->configuration[1]['rules_without_ball'][0];
-        $this->assertEquals('The ball is in my side', $rule['condition']);
+        $this->assertEquals(\App\Services\PlayerRules::C_BALL_IN_MY_SIDE, $rule['condition']);
     }
 
     public function test_assign_rule_replaces_existing_at_same_priority(): void
     {
         $team = $this->createTeamWithConfig();
 
-        $base = ['position_index' => 0, 'slot' => 'with_ball', 'priority' => 0, 'condition' => 'I has the ball'];
+        $base = [
+            'position_index' => 0,
+            'slot'           => 'with_ball',
+            'priority'       => 0,
+            'condition'      => \App\Services\PlayerRules::C_HAS_BALL, // "I has the ball"
+        ];
 
-        $this->postJson("/api/teams/{$team->id}/rule", array_merge($base, ['action' => 'Pass the ball']));
-        $this->postJson("/api/teams/{$team->id}/rule", array_merge($base, ['action' => 'Shoot to goal']));
+        $this->postJson("/api/teams/{$team->id}/rule", array_merge($base, ['action' => \App\Services\PlayerRules::A_PASS]));  // "Pass the ball"
+        $this->postJson("/api/teams/{$team->id}/rule", array_merge($base, ['action' => \App\Services\PlayerRules::A_SHOOT])); // "Shoot to goal"
 
         $rules = $team->fresh()->configuration[0]['rules_with_ball'];
         $this->assertCount(1, $rules);
-        $this->assertEquals('Shoot to goal', $rules[0]['action']);
+        $this->assertEquals(\App\Services\PlayerRules::A_SHOOT, $rules[0]['action']);
     }
 }

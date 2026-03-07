@@ -21,11 +21,11 @@ class TeamController extends Controller
             'configuration.*.default_zone_x'                 => 'required|numeric|min:0|max:100',
             'configuration.*.default_zone_y'                 => 'required|numeric|min:0|max:100',
             'configuration.*.rules_with_ball'                => 'nullable|array',
-            'configuration.*.rules_with_ball.*.condition'    => 'required|string|max:255',
-            'configuration.*.rules_with_ball.*.action'       => 'required|string|max:255',
+            'configuration.*.rules_with_ball.*.condition'    => 'required|integer',
+            'configuration.*.rules_with_ball.*.action'       => 'required|integer',
             'configuration.*.rules_without_ball'             => 'nullable|array',
-            'configuration.*.rules_without_ball.*.condition' => 'required|string|max:255',
-            'configuration.*.rules_without_ball.*.action'    => 'required|string|max:255',
+            'configuration.*.rules_without_ball.*.condition' => 'required|integer',
+            'configuration.*.rules_without_ball.*.action'    => 'required|integer',
         ]);
 
         // Apply attribute defaults for any omitted stats
@@ -105,8 +105,8 @@ class TeamController extends Controller
             'position_index' => 'required|integer|min:0|max:2',
             'slot'           => 'required|string|in:with_ball,without_ball',
             'priority'       => 'required|integer|min:0',
-            'condition'      => 'required|string|max:255',
-            'action'         => 'required|string|max:255',
+            'condition'      => 'required|integer',
+            'action'         => 'required|integer',
         ]);
 
         $config = $team->configuration ?? [];

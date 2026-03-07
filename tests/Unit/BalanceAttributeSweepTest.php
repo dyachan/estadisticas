@@ -2,6 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\Services\PlayerRules;
+
 /**
  * Attribute sweep balance tests.
  *
@@ -37,15 +39,15 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     private const PASS_FIRST_RULES = [
         [   // rules[0]: our team has ball
-            ['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'],
-            ['condition' => 'I has the ball',              'action' => 'Pass the ball'],
-            ['condition' => 'The ball is in my side',      'action' => 'Go forward'],
-            ['condition' => 'The ball is in other side',   'action' => 'Go forward'],
+            ['condition' => PlayerRules::C_BALL_NEAR_RIVAL_GOAL, 'action' => PlayerRules::A_SHOOT],          // "The ball is near rival goal" → "Shoot to goal"
+            ['condition' => PlayerRules::C_HAS_BALL,             'action' => PlayerRules::A_PASS],            // "I has the ball" → "Pass the ball"
+            ['condition' => PlayerRules::C_BALL_IN_MY_SIDE,      'action' => PlayerRules::A_GO_FORWARD],      // "The ball is in my side" → "Go forward"
+            ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,   'action' => PlayerRules::A_GO_FORWARD],      // "The ball is in other side" → "Go forward"
         ],
         [   // rules[1]: opponent has ball or no one has it
-            ['condition' => 'I am near a rival',           'action' => 'Go to near rival'],
-            ['condition' => 'The ball is in my side',      'action' => 'Go to the ball'],
-            ['condition' => 'The ball is in other side',   'action' => 'Go to the ball'],
+            ['condition' => PlayerRules::C_NEAR_RIVAL,           'action' => PlayerRules::A_GO_TO_NEAR_RIVAL], // "I am near a rival" → "Go to near rival"
+            ['condition' => PlayerRules::C_BALL_IN_MY_SIDE,      'action' => PlayerRules::A_GO_TO_BALL],       // "The ball is in my side" → "Go to the ball"
+            ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,   'action' => PlayerRules::A_GO_TO_BALL],       // "The ball is in other side" → "Go to the ball"
         ],
     ];
 

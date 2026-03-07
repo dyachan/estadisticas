@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use App\Services\MatchSimulation;
+use App\Services\PlayerRules;
 
 /**
  * Base class for balance / exploration tests.
@@ -16,7 +17,7 @@ use App\Services\MatchSimulation;
  * Rule set philosophy:
  *  rules[0] (our team has ball): carrier shoots immediately, teammates advance
  *  rules[1] (opponent has ball): nearest mark opponent, all others chase the ball
- *  defaultAction = "Stay in my zone" (set by MatchSimulation::loadTeams)
+ *  defaultAction = PlayerRules::A_STAY_IN_ZONE / "Stay in my zone" (set by MatchSimulation::loadTeams)
  *
  * This produces a realistic-enough game loop for statistical exploration
  * without requiring user-defined tactics.
@@ -41,15 +42,15 @@ abstract class BalanceTestCase extends TestCase
      */
     protected const ACTIVE_RULES = [
         [   // rules[0]: our team has ball
-            ['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'],
-            ['condition' => 'I has the ball',              'action' => 'Go to rival goal'],
-            ['condition' => 'The ball is in my side',      'action' => 'Go forward'],
-            ['condition' => 'The ball is in other side',   'action' => 'Go forward'],
+            ['condition' => PlayerRules::C_BALL_NEAR_RIVAL_GOAL, 'action' => PlayerRules::A_SHOOT],          // "The ball is near rival goal" → "Shoot to goal"
+            ['condition' => PlayerRules::C_HAS_BALL,             'action' => PlayerRules::A_GO_TO_RIVAL_GOAL], // "I has the ball" → "Go to rival goal"
+            ['condition' => PlayerRules::C_BALL_IN_MY_SIDE,      'action' => PlayerRules::A_GO_FORWARD],      // "The ball is in my side" → "Go forward"
+            ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,   'action' => PlayerRules::A_GO_FORWARD],      // "The ball is in other side" → "Go forward"
         ],
         [   // rules[1]: opponent has ball or no one has it
-            ['condition' => 'I am near a rival',           'action' => 'Go to near rival'],
-            ['condition' => 'The ball is in my side',      'action' => 'Go to the ball'],
-            ['condition' => 'The ball is in other side',   'action' => 'Go to the ball'],
+            ['condition' => PlayerRules::C_NEAR_RIVAL,           'action' => PlayerRules::A_GO_TO_NEAR_RIVAL], // "I am near a rival" → "Go to near rival"
+            ['condition' => PlayerRules::C_BALL_IN_MY_SIDE,      'action' => PlayerRules::A_GO_TO_BALL],       // "The ball is in my side" → "Go to the ball"
+            ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,   'action' => PlayerRules::A_GO_TO_BALL],       // "The ball is in other side" → "Go to the ball"
         ],
     ];
 
@@ -71,27 +72,27 @@ abstract class BalanceTestCase extends TestCase
     private const FORMATIONS = [
         // Offensive FC
         [
-            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 20]],
-            ['rules' => [[['condition' => 'The ball is in other side', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 30, 'y' => 60]],
-            ['rules' => [[['condition' => 'The ball is in other side', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 65, 'y' => 80]],
+            ['rules' => [[[  'condition' => PlayerRules::C_HAS_BALL,           'action' => PlayerRules::A_PASS]],        [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,      'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 50, 'y' => 20]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,  'action' => PlayerRules::A_SHOOT],        ['condition' => PlayerRules::C_HAS_BALL,              'action' => PlayerRules::A_GO_FORWARD]],   [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,    'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE, 'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 30, 'y' => 60]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,  'action' => PlayerRules::A_SHOOT],        ['condition' => PlayerRules::C_HAS_BALL,              'action' => PlayerRules::A_GO_FORWARD]],   [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,    'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE, 'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 65, 'y' => 80]],
         ],
         // Turtles
         [
-            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is near my goal', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 15]],
-            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Go to near rival']]], 'defaultZone' => ['x' => 35, 'y' => 35]],
-            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 65, 'y' => 50]],
+            ['rules' => [[[  'condition' => PlayerRules::C_HAS_BALL,            'action' => PlayerRules::A_PASS]],        [['condition' => PlayerRules::C_BALL_NEAR_MY_GOAL,    'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 50, 'y' => 15]],
+            ['rules' => [[[  'condition' => PlayerRules::C_HAS_BALL,            'action' => PlayerRules::A_PASS]],        [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,      'action' => PlayerRules::A_GO_TO_BALL],   ['condition' => PlayerRules::C_NEAR_RIVAL, 'action' => PlayerRules::A_GO_TO_NEAR_RIVAL]]], 'defaultZone' => ['x' => 35, 'y' => 35]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_NEAR_RIVAL_GOAL,'action' => PlayerRules::A_SHOOT],        ['condition' => PlayerRules::C_HAS_BALL,              'action' => PlayerRules::A_GO_FORWARD]],   [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,    'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE, 'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 65, 'y' => 50]],
         ],
         // Team A
         [
-            ['rules' => [[['condition' => 'I am marked', 'action' => 'Change side'], ['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is near my goal', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 20]],
-            ['rules' => [[['condition' => 'The ball is in other side', 'action' => 'Pass the ball'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Go to near rival']]], 'defaultZone' => ['x' => 50, 'y' => 50]],
-            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward'], ['condition' => 'I am near a rival', 'action' => 'Change side']], [['condition' => 'The ball is in other side', 'action' => 'Go to the ball'], ['condition' => 'Rival in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Change side']]], 'defaultZone' => ['x' => 75, 'y' => 70]],
+            ['rules' => [[[  'condition' => PlayerRules::C_AM_MARKED,           'action' => PlayerRules::A_CHANGE_SIDE],  ['condition' => PlayerRules::C_HAS_BALL,             'action' => PlayerRules::A_PASS]],          [['condition' => PlayerRules::C_BALL_NEAR_MY_GOAL,  'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 50, 'y' => 20]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_IN_OTHER_SIDE,  'action' => PlayerRules::A_PASS],         ['condition' => PlayerRules::C_HAS_BALL,             'action' => PlayerRules::A_GO_FORWARD]],   [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,    'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_NEAR_RIVAL,         'action' => PlayerRules::A_GO_TO_NEAR_RIVAL]]], 'defaultZone' => ['x' => 50, 'y' => 50]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_NEAR_RIVAL_GOAL,'action' => PlayerRules::A_SHOOT],        ['condition' => PlayerRules::C_HAS_BALL,             'action' => PlayerRules::A_GO_FORWARD],    ['condition' => PlayerRules::C_NEAR_RIVAL, 'action' => PlayerRules::A_CHANGE_SIDE]], [['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE, 'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_RIVAL_IN_MY_SIDE, 'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_NEAR_RIVAL, 'action' => PlayerRules::A_CHANGE_SIDE]]], 'defaultZone' => ['x' => 75, 'y' => 70]],
         ],
         // Pomarola Mecánica
         [
-            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is near my goal', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 20]],
-            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I am near a rival', 'action' => 'Pass the ball'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Go to near rival']]], 'defaultZone' => ['x' => 50, 'y' => 40]],
-            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward'], ['condition' => 'I am marked', 'action' => 'Change side']], [['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 60]],
+            ['rules' => [[[  'condition' => PlayerRules::C_HAS_BALL,            'action' => PlayerRules::A_PASS]],        [['condition' => PlayerRules::C_BALL_NEAR_MY_GOAL,    'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 50, 'y' => 20]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_NEAR_RIVAL_GOAL,'action' => PlayerRules::A_SHOOT],        ['condition' => PlayerRules::C_NEAR_RIVAL,            'action' => PlayerRules::A_PASS],          ['condition' => PlayerRules::C_HAS_BALL, 'action' => PlayerRules::A_GO_FORWARD]],  [['condition' => PlayerRules::C_BALL_IN_MY_SIDE,    'action' => PlayerRules::A_GO_TO_BALL], ['condition' => PlayerRules::C_NEAR_RIVAL,         'action' => PlayerRules::A_GO_TO_NEAR_RIVAL]]], 'defaultZone' => ['x' => 50, 'y' => 40]],
+            ['rules' => [[[  'condition' => PlayerRules::C_BALL_NEAR_RIVAL_GOAL,'action' => PlayerRules::A_SHOOT],        ['condition' => PlayerRules::C_HAS_BALL,             'action' => PlayerRules::A_GO_FORWARD],    ['condition' => PlayerRules::C_AM_MARKED, 'action' => PlayerRules::A_CHANGE_SIDE]],  [['condition' => PlayerRules::C_BALL_IN_OTHER_SIDE, 'action' => PlayerRules::A_GO_TO_BALL]]], 'defaultZone' => ['x' => 50, 'y' => 60]],
         ],
     ];
 

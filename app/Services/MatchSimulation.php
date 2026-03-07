@@ -5,6 +5,7 @@ use App\Services\Ball;
 use App\Services\Player;
 use App\Services\PlayerAction;
 use App\Services\PlayerMemory;
+use App\Services\PlayerRules;
 use App\Services\MatchSummary;
 
 class MatchSimulation
@@ -86,7 +87,7 @@ class MatchSimulation
                 "y" => $initialPositions[$i]["y"],
                 "baseX" => $this->width * $p["defaultZone"]["x"] / 100,
                 "baseY" => $this->height * $p["defaultZone"]["y"] / 100,
-                "defaultAction" => "Stay in my zone",
+                "defaultAction" => PlayerRules::A_STAY_IN_ZONE, // "Stay in my zone"
                 "currentFieldSide" => "bottom",
                 "fieldWidth" => $this->width,
                 "fieldHeight" => $this->height,
@@ -113,7 +114,7 @@ class MatchSimulation
                 "y" => $this->height - $initialPositions[$i]["y"],
                 "baseX" => $this->width * (100-$p["defaultZone"]["x"]) / 100,
                 "baseY" => $this->height * (100-$p["defaultZone"]["y"]) / 100,
-                "defaultAction" => "Stay in my zone",
+                "defaultAction" => PlayerRules::A_STAY_IN_ZONE, // "Stay in my zone"
                 "currentFieldSide" => "top",
                 "fieldWidth" => $this->width,
                 "fieldHeight" => $this->height,
@@ -480,7 +481,7 @@ class MatchSimulation
         foreach (['Team A', 'Team B'] as $team) {
             $candidates = array_filter($this->players, fn($p) =>
                 $p->team === $team && $p->bodyCooldown <= 0 &&
-                in_array($p->currentAction, ["Go to the ball", "Go to near rival"])
+                in_array($p->currentAction, [PlayerRules::A_GO_TO_BALL, PlayerRules::A_GO_TO_NEAR_RIVAL]) // "Go to the ball", "Go to near rival"
             );
 
             if (empty($candidates)) {

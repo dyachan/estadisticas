@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\PlayerAction;
 use App\Services\PlayerMemory;
+use App\Services\PlayerRules;
 use App\Services\PlayerSummary;
 use App\Services\PlayerFormulas;
 
@@ -36,7 +37,7 @@ class Player
     public bool $marked = false;
     public bool $opponentNear = false;
 
-    public string $defaultAction;
+    public int $defaultAction;
     public string $currentFieldSide;
 
     public float $ballCooldown = 0;
@@ -57,8 +58,8 @@ class Player
     public array $currentSpeed = ['vx' => 0, 'vy' => 0];
     public ?array $target = null;
 
-    public string $currentAction;
-    public ?string $currentCondition = null;
+    public int $currentAction;
+    public ?int $currentCondition = null;
 
     public float $fieldWidth;
     public float $fieldHeight;
@@ -353,11 +354,11 @@ class Player
 
         switch ($this->currentAction) {
 
-            case "Go to the ball":
+            case PlayerRules::A_GO_TO_BALL: // "Go to the ball"
                 $this->setTarget(['x' => $ball->x, 'y' => $ball->y], $this->memory);
                 break;
 
-            case "Go to near rival":
+            case PlayerRules::A_GO_TO_NEAR_RIVAL: // "Go to near rival"
                 if (count($opponents) > 0) {
                     $closest = null;
                     $closestDist = INF;
@@ -376,27 +377,27 @@ class Player
                 }
                 break;
 
-            case "Go to my goal":
+            case PlayerRules::A_GO_TO_MY_GOAL: // "Go to my goal"
                 $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
                 $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY], $this->memory);
                 break;
 
-            case "Go to rival goal":
+            case PlayerRules::A_GO_TO_RIVAL_GOAL: // "Go to rival goal"
                 $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
                 $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY], $this->memory);
                 break;
 
-            case "Go forward":
+            case PlayerRules::A_GO_FORWARD: // "Go forward"
                 $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
                 $this->setTarget(['x' => $this->x, 'y' => $goalY], $this->memory);
                 break;
 
-            case "Go back":
+            case PlayerRules::A_GO_BACK: // "Go back"
                 $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
                 $this->setTarget(['x' => $this->x, 'y' => $goalY], $this->memory);
                 break;
 
-            case "Pass the ball":
+            case PlayerRules::A_PASS: // "Pass the ball"
                 if ($this->hasBall) {
                     $free = array_filter($teammates, fn($p) => !$p->marked);
 
@@ -426,7 +427,7 @@ class Player
                 }
                 break;
 
-            case "Shoot to goal":
+            case PlayerRules::A_SHOOT: // "Shoot to goal"
                 if ($this->hasBall) {
                     $this->hasBall = false;
                     $this->summary->shootMade++;
@@ -434,7 +435,7 @@ class Player
                 }
                 break;
 
-            case "Change side":
+            case PlayerRules::A_CHANGE_SIDE: // "Change side"
                 $left = ['x' => $fieldWidth * (0.3-rand(1,20)/100), 'y' => $this->y];
                 $right = ['x' => $fieldWidth * (0.7+rand(1,20)/100), 'y' => $this->y];
 
@@ -490,52 +491,52 @@ class Player
     }
 
     /** Evaluate conditions */
-    public function evaluateCondition(string $cond, string $action, PlayerMemory $simState): bool
+    public function evaluateCondition(int $cond, int $action, PlayerMemory $simState): bool
     {
         $ball = $simState->ball;
         $opponents = $simState->opponents;
         $fieldWidth = $this->fieldWidth;
         $fieldHeight = $this->fieldHeight;
 
-        if (in_array($action, ["Pass the ball", "Shoot to goal"]) && !$this->hasBall) {
+        if (in_array($action, [PlayerRules::A_PASS, PlayerRules::A_SHOOT]) && !$this->hasBall) { // "Pass the ball", "Shoot to goal"
             return false;
         }
 
-        if ($action === "Go to near rival" && !$this->opponentNear) {
+        if ($action === PlayerRules::A_GO_TO_NEAR_RIVAL && !$this->opponentNear) { // "Go to near rival"
             return false;
         }
 
         switch ($cond) {
-            case "I has the ball":
+            case PlayerRules::C_HAS_BALL: // "I has the ball"
                 return $this->hasBall;
 
-            case "I am marked":
+            case PlayerRules::C_AM_MARKED: // "I am marked"
                 return $this->marked;
 
-            case "I am near a rival":
+            case PlayerRules::C_NEAR_RIVAL: // "I am near a rival"
                 return $this->opponentNear;
 
-            case "The ball is near my goal":
+            case PlayerRules::C_BALL_NEAR_MY_GOAL: // "The ball is near my goal"
                 return ($this->currentFieldSide === "bottom" && $ball->y < $fieldHeight * 0.3) ||
                        ($this->currentFieldSide === "top" && $ball->y > $fieldHeight * 0.7);
 
-            case "The ball is in my side":
+            case PlayerRules::C_BALL_IN_MY_SIDE: // "The ball is in my side"
                 return ($this->currentFieldSide === "bottom" && $ball->y < $fieldHeight * 0.51) ||
                        ($this->currentFieldSide === "top" && $ball->y > $fieldHeight * 0.49);
 
-            case "The ball is in other side":
+            case PlayerRules::C_BALL_IN_OTHER_SIDE: // "The ball is in other side"
                 return ($this->currentFieldSide === "top" && $ball->y < $fieldHeight * 0.51) ||
                        ($this->currentFieldSide === "bottom" && $ball->y > $fieldHeight * 0.49);
 
-            case "The ball is near rival goal":
+            case PlayerRules::C_BALL_NEAR_RIVAL_GOAL: // "The ball is near rival goal"
                 return ($this->currentFieldSide === "top" && $ball->y < $fieldHeight * 0.3) ||
                        ($this->currentFieldSide === "bottom" && $ball->y > $fieldHeight * 0.7);
 
-            case "Rival in my side":
+            case PlayerRules::C_RIVAL_IN_MY_SIDE: // "Rival in my side"
                 return ($this->currentFieldSide === "top" && !collect($opponents)->every(fn($p) => $p->y > $fieldHeight * 0.49))
                     || ($this->currentFieldSide === "bottom" && !collect($opponents)->every(fn($p) => $p->y < $fieldHeight * 0.51));
 
-            case "No rival in my side":
+            case PlayerRules::C_NO_RIVAL_IN_MY_SIDE: // "No rival in my side"
                 return ($this->currentFieldSide === "top" && collect($opponents)->every(fn($p) => $p->y > $fieldHeight * 0.49))
                     || ($this->currentFieldSide === "bottom" && collect($opponents)->every(fn($p) => $p->y < $fieldHeight * 0.51));
 
