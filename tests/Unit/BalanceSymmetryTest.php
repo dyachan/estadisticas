@@ -26,8 +26,7 @@ class BalanceSymmetryTest extends BalanceTestCase
      */
     public function test_simulation_produces_game_events(): void
     {
-        $team   = $this->makeTeam();
-        $result = $this->runMatch($team, $team);
+        $result = $this->runMatch($this->makeTeam(), $this->makeTeam());
 
         $totalActivity = $result['totalChallenges']
             + $result['teamA']['controledBalls']
@@ -47,13 +46,12 @@ class BalanceSymmetryTest extends BalanceTestCase
      */
     public function test_both_teams_can_score(): void
     {
-        $team    = $this->makeTeam();
         $totalA  = 0;
         $totalB  = 0;
         $matches = 8;
 
         for ($i = 0; $i < $matches; $i++) {
-            $r      = $this->runMatch($team, $team);
+            $r      = $this->runMatch($this->makeTeam(), $this->makeTeam());
             $totalA += $r['goalsA'];
             $totalB += $r['goalsB'];
         }
@@ -88,8 +86,7 @@ class BalanceSymmetryTest extends BalanceTestCase
      */
     public function test_identical_teams_have_balanced_possession(): void
     {
-        $team = $this->makeTeam();
-        $avg  = $this->runMatchSet($team, $team);
+        $avg = $this->runMatchSet(fn() => $this->makeTeam(), fn() => $this->makeTeam());
 
         $this->assertLessThan(
             0.65,
@@ -124,13 +121,12 @@ class BalanceSymmetryTest extends BalanceTestCase
      */
     public function test_identical_teams_have_balanced_goal_distribution(): void
     {
-        $team    = $this->makeTeam();
         $totalA  = 0;
         $totalB  = 0;
         $matches = 10;
 
         for ($i = 0; $i < $matches; $i++) {
-            $r      = $this->runMatch($team, $team);
+            $r      = $this->runMatch($this->makeTeam(), $this->makeTeam());
             $totalA += $r['goalsA'];
             $totalB += $r['goalsB'];
         }
@@ -177,8 +173,7 @@ class BalanceSymmetryTest extends BalanceTestCase
      */
     public function test_challenges_happen_and_are_symmetric(): void
     {
-        $team = $this->makeTeam();
-        $avg  = $this->runMatchSet($team, $team);
+        $avg = $this->runMatchSet(fn() => $this->makeTeam(), fn() => $this->makeTeam());
 
         // Challenges are rare in this rule set (carrier moves quickly toward goal),
         // but should happen at least once over 5 matches of 2000 ticks.
@@ -220,8 +215,7 @@ class BalanceSymmetryTest extends BalanceTestCase
      */
     public function test_identical_teams_travel_similar_distance(): void
     {
-        $team = $this->makeTeam();
-        $avg  = $this->runMatchSet($team, $team);
+        $avg = $this->runMatchSet(fn() => $this->makeTeam(), fn() => $this->makeTeam());
 
         $distA = $avg['teamA']['distanceTraveled'];
         $distB = $avg['teamB']['distanceTraveled'];

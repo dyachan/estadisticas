@@ -42,13 +42,16 @@ class Player
     public float $ballCooldown = 0;
     public float $bodyCooldown = 0;
 
-    public float $maxSpeed = 2.0;
-    public float $accuracyDeviation = 40.0;      // pixels of random deviation on pass/shot targets
-    public float $controlSpeedThreshold = 6.0;   // max ball speed at which this player can take possession
-    public float $reactionFactor = 0.5;           // defender steal factor (0–1)
-    public float $dribbleFactor = 0.5;            // attacker keep-ball factor (0–1)
-    public float $strengthDepletionRate = 0.0005; // currentStrength lost per unit of distance moved
-    public float $enduranceRecoveryRate = 0.00025;// currentStrength recovered per tick
+    public float $maxSpeed;
+    public float $accuracyDeviation;      // pixels of random deviation on pass/shot targets
+    public float $controlSpeedThreshold;  // max ball speed at which this player can take possession
+    public float $reactionFactor;         // defender steal factor (0–1)
+    public float $dribbleFactor;          // attacker keep-ball factor (0–1)
+    public float $strengthDepletionRate;  // currentStrength lost per unit of distance moved
+    public float $enduranceRecoveryRate;  // currentStrength recovered per tick
+    // How many ticks to wait before refreshing memory depending on ball possession
+    public int $memoryRefreshPeriodWithBall;
+    public int $memoryRefreshPeriodWithoutBall;
     public float $currentStrength = 1.0;          // runtime resource (0–1); depletes when running
 
     public array $currentSpeed = ['vx' => 0, 'vy' => 0];
@@ -65,10 +68,6 @@ class Player
     public PlayerMemory $memory;
 
     private const STRENGTH_SPEED_FLOOR = 0.4; // min speed fraction when fully exhausted
-
-    // How many ticks to wait before refreshing memory depending on ball possession
-    public int $memoryRefreshPeriodWithBall = 300;
-    public int $memoryRefreshPeriodWithoutBall = 300;
 
     public function __construct(array $config)
     {
@@ -92,33 +91,15 @@ class Player
 
         $this->memory = new PlayerMemory();
         $this->summary = new PlayerSummary();
-        if (isset($config['scanWithBall'])) {
-            $this->memoryRefreshPeriodWithBall = PlayerFormulas::scanPeriodWithBall($config['scanWithBall']);
-        }
-        if (isset($config['scanWithoutBall'])) {
-            $this->memoryRefreshPeriodWithoutBall = PlayerFormulas::scanPeriodWithoutBall($config['scanWithoutBall']);
-        }
-        if (isset($config['maxSpeed'])) {
-            $this->maxSpeed = PlayerFormulas::maxSpeed($config['maxSpeed']);
-        }
-        if (isset($config['accuracy'])) {
-            $this->accuracyDeviation = PlayerFormulas::accuracyDeviation($config['accuracy']);
-        }
-        if (isset($config['control'])) {
-            $this->controlSpeedThreshold = PlayerFormulas::controlSpeedThreshold($config['control']);
-        }
-        if (isset($config['reaction'])) {
-            $this->reactionFactor = PlayerFormulas::reactionFactor($config['reaction']);
-        }
-        if (isset($config['dribble'])) {
-            $this->dribbleFactor = PlayerFormulas::dribbleFactor($config['dribble']);
-        }
-        if (isset($config['strength'])) {
-            $this->strengthDepletionRate = PlayerFormulas::strengthDepletionRate($config['strength']);
-        }
-        if (isset($config['endurance'])) {
-            $this->enduranceRecoveryRate = PlayerFormulas::enduranceRecoveryRate($config['endurance']);
-        }
+        $this->maxSpeed                       = PlayerFormulas::maxSpeed($config['maxSpeed'] ?? 0.5);
+        $this->accuracyDeviation              = PlayerFormulas::accuracyDeviation($config['accuracy'] ?? 0.5);
+        $this->controlSpeedThreshold          = PlayerFormulas::controlSpeedThreshold($config['control'] ?? 0.5);
+        $this->reactionFactor                 = PlayerFormulas::reactionFactor($config['reaction'] ?? 0.5);
+        $this->dribbleFactor                  = PlayerFormulas::dribbleFactor($config['dribble'] ?? 0.5);
+        $this->strengthDepletionRate          = PlayerFormulas::strengthDepletionRate($config['strength'] ?? 0.5);
+        $this->enduranceRecoveryRate          = PlayerFormulas::enduranceRecoveryRate($config['endurance'] ?? 0.5);
+        $this->memoryRefreshPeriodWithBall    = PlayerFormulas::scanPeriodWithBall($config['scanWithBall'] ?? 0.5);
+        $this->memoryRefreshPeriodWithoutBall = PlayerFormulas::scanPeriodWithoutBall($config['scanWithoutBall'] ?? 0.5);
     }
 
     /** Update cached memory from a fresh simState and record tick */

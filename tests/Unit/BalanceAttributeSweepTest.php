@@ -56,11 +56,13 @@ class BalanceAttributeSweepTest extends BalanceTestCase
     /**
      * Run N matches, return averaged metrics + raw goal totals for collapse check.
      */
-    private function sweep(array $teamA, array $teamB, int $matches, int $ticks = self::TICKS_PER_MATCH): array
+    private function sweep(array|callable $teamA, array|callable $teamB, int $matches, int $ticks = self::TICKS_PER_MATCH): array
     {
         $results = [];
         for ($i = 0; $i < $matches; $i++) {
-            $results[] = $this->runMatch($teamA, $teamB, $ticks);
+            $a = is_callable($teamA) ? ($teamA)() : $teamA;
+            $b = is_callable($teamB) ? ($teamB)() : $teamB;
+            $results[] = $this->runMatch($a, $b, $ticks);
         }
         $avg           = $this->averageResults($results);
         $avg['_goalsA'] = array_sum(array_column($results, 'goalsA'));
@@ -125,9 +127,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_maxspeed_1v01_controls_more_loose_balls_and_no_collapse(): void
     {
-        $fast = $this->makeTeam(['maxSpeed' => 1.0]);
-        $slow = $this->makeTeam(['maxSpeed' => 0.1]);
-        $avg  = $this->sweep($fast, $slow, matches: 8);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['maxSpeed' => 1.0]),
+            fn() => $this->makeTeam(['maxSpeed' => 0.1]),
+            matches: 8
+        );
 
         // Directional: fast team should win more loose-ball races
         $this->assertGreaterThan(
@@ -157,9 +161,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_endurance_1v01_distance_advantage_over_long_match(): void
     {
-        $hiEnd = $this->makeTeam(['endurance' => 1.0]);
-        $loEnd = $this->makeTeam(['endurance' => 0.1]);
-        $avg   = $this->sweep($hiEnd, $loEnd, matches: 5, ticks: 5000);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['endurance' => 1.0]),
+            fn() => $this->makeTeam(['endurance' => 0.1]),
+            matches: 5, ticks: 5000
+        );
 
         $distA = $avg['teamA']['distanceTraveled'];
         $distB = $avg['teamB']['distanceTraveled'];
@@ -193,9 +199,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_reaction_1v0_steals_more_and_no_collapse(): void
     {
-        $hiReact = $this->makeTeam(['reaction' => 1.0]);
-        $noReact = $this->makeTeam(['reaction' => 0.0]);
-        $avg     = $this->sweep($hiReact, $noReact, matches: 15);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['reaction' => 1.0]),
+            fn() => $this->makeTeam(['reaction' => 0.0]),
+            matches: 15
+        );
 
         $stealsA = $avg['teamA']['stealedBalls'];
         $stealsB = $avg['teamB']['stealedBalls'];
@@ -229,13 +237,17 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_dribble_1v0_loses_ball_less_often(): void
     {
-        $neutral = $this->makeTeam();  // reaction=0.5, dribble=0.5
+        $avgHi = $this->sweep(
+            fn() => $this->makeTeam(['dribble' => 1.0]),
+            fn() => $this->makeTeam(),   // reaction=0.5, dribble=0.5
+            matches: 15
+        );
 
-        $hiDribble = $this->makeTeam(['dribble' => 1.0]);
-        $avgHi     = $this->sweep($hiDribble, $neutral, matches: 15);
-
-        $loDribble = $this->makeTeam(['dribble' => 0.0]);
-        $avgLo     = $this->sweep($loDribble, $neutral, matches: 15);
+        $avgLo = $this->sweep(
+            fn() => $this->makeTeam(['dribble' => 0.0]),
+            fn() => $this->makeTeam(),
+            matches: 15
+        );
 
         $failedHi = $avgHi['teamA']['dribbleFailed'];  // high-dribble team
         $failedLo = $avgLo['teamA']['dribbleFailed'];  // low-dribble team
@@ -277,9 +289,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_control_1v01_low_control_fails_more_pickups(): void
     {
-        $hiCtrl = $this->makeTeam(['control' => 1.0]);
-        $loCtrl = $this->makeTeam(['control' => 0.1]);
-        $avg    = $this->sweep($hiCtrl, $loCtrl, matches: 8);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['control' => 1.0]),
+            fn() => $this->makeTeam(['control' => 0.1]),
+            matches: 8
+        );
 
         $interceptsA = $avg['teamA']['interceptedBalls'];  // high-control: should fail less
         $interceptsB = $avg['teamB']['interceptedBalls'];  // low-control:  should fail more
@@ -329,9 +343,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_reaction1_vs_dribble1_advantage_and_no_collapse(): void
     {
-        $reactTeam   = $this->makeTeam(['reaction' => 1.0, 'dribble' => 0.5]);
-        $dribbleTeam = $this->makeTeam(['reaction' => 0.5, 'dribble' => 1.0]);
-        $avg         = $this->sweep($reactTeam, $dribbleTeam, matches: 30);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['reaction' => 1.0, 'dribble' => 0.5]),
+            fn() => $this->makeTeam(['reaction' => 0.5, 'dribble' => 1.0]),
+            matches: 30
+        );
 
         // Directional: dribble=1.0 team should complete more successful dribbles
         // than dribble=0.5 team (50% vs 25% success rate per challenge as carrier).
@@ -377,9 +393,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_strength_1v0_distance_advantage_over_long_match(): void
     {
-        $hiStr = $this->makeTeam(['strength' => 1.0, 'endurance' => 0.0]);
-        $loStr = $this->makeTeam(['strength' => 0.0, 'endurance' => 0.0]);
-        $avg   = $this->sweep($hiStr, $loStr, matches: 5, ticks: 5000);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['strength' => 1.0, 'endurance' => 0.0]),
+            fn() => $this->makeTeam(['strength' => 0.0, 'endurance' => 0.0]),
+            matches: 5, ticks: 5000
+        );
 
         $distA = $avg['teamA']['distanceTraveled'];
         $distB = $avg['teamB']['distanceTraveled'];
@@ -423,9 +441,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_scanWithBall_1v0_achieves_more_passes(): void
     {
-        $hiScan = $this->makeTeam(['scanWithBall' => 1.0], self::PASS_FIRST_RULES);
-        $loScan = $this->makeTeam(['scanWithBall' => 0.0], self::PASS_FIRST_RULES);
-        $avg    = $this->sweep($hiScan, $loScan, matches: 15);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['scanWithBall' => 1.0], self::PASS_FIRST_RULES),
+            fn() => $this->makeTeam(['scanWithBall' => 0.0], self::PASS_FIRST_RULES),
+            matches: 15
+        );
 
         $achievedA = $avg['teamA']['passesAchieved'];
         $achievedB = $avg['teamB']['passesAchieved'];
@@ -466,9 +486,11 @@ class BalanceAttributeSweepTest extends BalanceTestCase
      */
     public function test_scanWithoutBall_1v0_controls_more_balls(): void
     {
-        $hiScan = $this->makeTeam(['scanWithoutBall' => 1.0]);
-        $loScan = $this->makeTeam(['scanWithoutBall' => 0.0]);
-        $avg    = $this->sweep($hiScan, $loScan, matches: 10);
+        $avg = $this->sweep(
+            fn() => $this->makeTeam(['scanWithoutBall' => 1.0]),
+            fn() => $this->makeTeam(['scanWithoutBall' => 0.0]),
+            matches: 10
+        );
 
         $controlsA = $avg['teamA']['controledBalls'];
         $controlsB = $avg['teamB']['controledBalls'];

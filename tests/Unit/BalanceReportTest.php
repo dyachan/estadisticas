@@ -17,8 +17,8 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * Reports:
  *   1. test_attribute_sweep_report       — each attribute swept 0.1→0.9 vs neutral team
- *   2. test_attribute_correlation_report — Pearson r of attributes vs outcome metrics
- *   3. test_attribute_extremes_report    — hi(0.9) vs lo(0.1) quick summary per attribute
+ *   2. test_attribute_correlation_report — Pearson r of attributes vs all outcome metrics
+ *   3. test_attribute_extremes_report    — hi(0.9) vs lo(0.1) summary per attribute
  *
  * NOTE on endurance / strength: both affect distanceTraveled; their signal is
  * most pronounced over long matches. TICKS_PER_MATCH is now pulled from
@@ -58,9 +58,12 @@ class BalanceReportTest extends BalanceTestCase
      * For each attribute, sweep its value from 0.1 to 0.9 while all other
      * attributes stay at 0.5. Team B is always a neutral (all-0.5) opponent.
      *
-     * Two sub-tables per attribute:
-     *   Table A — standard match outcomes: goals, possession, shots.
-     *   Table B — ball-event metrics: controledBalls, steals, dribbleFailed.
+     * Five sub-tables per attribute covering all PlayerSummary stats:
+     *   Table A — goals / possession
+     *   Table B — shooting / passing
+     *   Table C — ball control (controlled, intercepted, steals, takeoffs)
+     *   Table D — dribble / challenge
+     *   Table E — distance
      *
      * Look for: which rows in G-Diff or Poss-A% change noticeably → that
      * attribute meaningfully affects match outcomes.
@@ -93,8 +96,8 @@ class BalanceReportTest extends BalanceTestCase
      *   |r| 0.3–0.5  medium
      *   |r| < 0.3  weak / noisy
      *
-     * Outcomes tracked: goal differential, possession differential, shots by A,
-     * controlled balls by A, steals by A, dribbleFailed by A, distance by A.
+     * Outcomes cover all PlayerSummary stats for Team A plus goal/poss differentials,
+     * split into three grouped sub-tables for readability.
      */
     public function test_attribute_correlation_report(): void
     {
@@ -104,53 +107,60 @@ class BalanceReportTest extends BalanceTestCase
             'Pearson r ∈ [−1, 1].  |r| > 0.5 = strong | 0.3–0.5 = medium | < 0.3 = weak.'
         );
 
-        $neutral = $this->makeTeam();
-        $rows    = [];
+        $rows = [];
 
         for ($i = 0; $i < self::CORR_SAMPLES; $i++) {
             $attrs = [];
             foreach (self::ATTRIBUTES as $attr) {
                 $attrs[$attr] = round(mt_rand(10, 90) / 100, 2);
             }
-            $result = $this->runMatch($this->makeTeam($attrs), $neutral);
+            $r      = $this->runMatch($this->makeTeam($attrs), $this->makeTeam());
             $rows[] = array_merge($attrs, [
-                'goalDiff'   => $result['goalsA']      - $result['goalsB'],
-                'possDiff'   => $result['possessionA'] - $result['possessionB'],
-                'shotsA'     => $result['teamA']['shootMade'],
-                'ctrlBallsA' => $result['teamA']['controledBalls'],
-                'stealsA'    => $result['teamA']['stealedBalls'],
-                'dribFailA'  => $result['teamA']['dribbleFailed'],
-                'distA'      => $result['teamA']['distanceTraveled'],
+                'goalDiff'  => $r['goalsA']      - $r['goalsB'],
+                'possDiff'  => $r['possessionA'] - $r['possessionB'],
+                'shotsA'    => $r['teamA']['shootMade'],
+                'pasMadeA'  => $r['teamA']['passesMade'],
+                'pasAchA'   => $r['teamA']['passesAchieved'],
+                'ctrlA'     => $r['teamA']['controledBalls'],
+                'intcpA'    => $r['teamA']['interceptedBalls'],
+                'stealsA'   => $r['teamA']['stealedBalls'],
+                'tkoffA'    => $r['teamA']['takedoffBalls'],
+                'dribDoneA' => $r['teamA']['dribbleDone'],
+                'dribFailA' => $r['teamA']['dribbleFailed'],
+                'chMeA'     => $r['teamA']['challengedMeWithBall'],
+                'chRivA'    => $r['teamA']['challengedRivalWithBall'],
+                'distA'     => $r['teamA']['distanceTraveled'],
+                'distBallA' => $r['teamA']['distanceTraveledWithBall'],
             ]);
         }
 
-        $outcomes = [
-            'goalDiff'   => 'Goal-Diff',
-            'possDiff'   => 'Poss-Diff',
-            'shotsA'     => 'Shots-A',
-            'ctrlBallsA' => 'CtrlBalls',
-            'stealsA'    => 'Steals-A',
-            'dribFailA'  => 'DribFail-A',
-            'distA'      => 'Dist-A',
+        $groups = [
+            'Scoring & Passing' => [
+                'goalDiff' => 'Goal-Diff',
+                'possDiff' => 'Poss-Diff',
+                'shotsA'   => 'Shots-A',
+                'pasMadeA' => 'PasMade-A',
+                'pasAchA'  => 'PasAch-A',
+            ],
+            'Ball Possession' => [
+                'ctrlA'     => 'Ctrl-A',
+                'intcpA'    => 'Intcp-A',
+                'stealsA'   => 'Steals-A',
+                'tkoffA'    => 'TkOff-A',
+                'dribDoneA' => 'DribDone-A',
+                'dribFailA' => 'DribFail-A',
+            ],
+            'Challenges & Distance' => [
+                'chMeA'     => 'ChMe-A',
+                'chRivA'    => 'ChRiv-A',
+                'distA'     => 'Dist-A',
+                'distBallA' => 'DistBall-A',
+            ],
         ];
 
-        $colW = 11;
-
-        $this->out("\n");
-        $this->out(sprintf("  %-14s", 'Attribute'));
-        foreach ($outcomes as $label) {
-            $this->out(sprintf(" │ %-{$colW}s", $label));
-        }
-        $this->out("\n  " . str_repeat('─', 14 + ($colW + 3) * count($outcomes)) . "\n");
-
-        foreach (self::ATTRIBUTES as $attr) {
-            $xs = array_column($rows, $attr);
-            $this->out(sprintf("  %-14s", $attr));
-            foreach (array_keys($outcomes) as $outcome) {
-                $r = $this->pearson($xs, array_column($rows, $outcome));
-                $this->out(sprintf(" │ %-{$colW}s", sprintf('%+.2f', $r)));
-            }
-            $this->out("\n");
+        foreach ($groups as $groupName => $outcomes) {
+            $this->out("\n  [$groupName]\n");
+            $this->printCorrelationGroup($rows, $outcomes);
         }
 
         $this->out("\n");
@@ -165,30 +175,38 @@ class BalanceReportTest extends BalanceTestCase
      * Quick comparison: attribute=0.9 (HIGH team) vs attribute=0.1 (LOW team).
      * All other attributes = 0.5 on both sides. 6 matches per attribute.
      *
-     * Goal: identify which attributes create the most lopsided matchups when
-     * pushed to extremes. A "EVEN" result means the attribute does not strongly
-     * determine match outcomes on its own (even at extreme values).
+     * Four sub-tables cover all PlayerSummary stats:
+     *   Table 1 — goals / possession / verdict
+     *   Table 2 — shooting / passing
+     *   Table 3 — ball control (controlled, intercepted, steals, takeoffs)
+     *   Table 4 — dribble / challenge
+     *   Table 5 — distance
      */
     public function test_attribute_extremes_report(): void
     {
         $this->sectionHeader(
             'REPORT 3 — ATTRIBUTE EXTREMES: HIGH (0.9) vs LOW (0.1)',
-            'All other attributes = 0.5.  6 matches per attribute.'
+            'All other attributes = 0.5.  6 matches per attribute.  Hi = attr 0.9 team.'
         );
 
+        // Collect all averages first so we can reuse them across sub-tables.
+        $avgs = [];
+        foreach (self::ATTRIBUTES as $attr) {
+            $avgs[$attr] = $this->runMatchSet(
+                fn() => $this->makeTeam([$attr => 0.9]),
+                fn() => $this->makeTeam([$attr => 0.1]),
+                6
+            );
+        }
+
+        // ── Sub-table 1: Goals & Possession ──────────────────────────────────
         $this->out(sprintf("\n  %-14s │ %-7s │ %-7s │ %-9s │ %-9s │ %-8s │ %s\n",
             'Attribute', 'Gls-Hi', 'Gls-Lo', 'Poss-Hi%', 'Poss-Lo%', 'G-Diff', 'Result'));
         $this->out('  ' . str_repeat('─', 72) . "\n");
-
         foreach (self::ATTRIBUTES as $attr) {
-            $avg  = $this->runMatchSet(
-                $this->makeTeam([$attr => 0.9]),
-                $this->makeTeam([$attr => 0.1]),
-                6
-            );
-            $diff   = $avg['goalsA'] - $avg['goalsB'];
-            $result = $diff > 0.3 ? 'HIGH wins' : ($diff < -0.3 ? 'LOW wins' : 'EVEN');
-
+            $avg     = $avgs[$attr];
+            $diff    = $avg['goalsA'] - $avg['goalsB'];
+            $verdict = $diff > 0.3 ? 'HIGH wins' : ($diff < -0.3 ? 'LOW wins' : 'EVEN');
             $this->out(sprintf("  %-14s │ %-7s │ %-7s │ %-9s │ %-9s │ %-8s │ %s\n",
                 $attr,
                 number_format($avg['goalsA'], 1),
@@ -196,9 +214,38 @@ class BalanceReportTest extends BalanceTestCase
                 number_format($avg['possessionA'] * 100, 1) . '%',
                 number_format($avg['possessionB'] * 100, 1) . '%',
                 sprintf('%+.1f', $diff),
-                $result
+                $verdict
             ));
         }
+
+        // ── Sub-table 2: Shooting & Passing ──────────────────────────────────
+        $this->printExtremesTable('Shooting & Passing', [
+            'Shots'   => 'shootMade',
+            'PasMade' => 'passesMade',
+            'PasAch'  => 'passesAchieved',
+        ], $avgs);
+
+        // ── Sub-table 3: Ball Control ─────────────────────────────────────────
+        $this->printExtremesTable('Ball Control', [
+            'Ctrl'  => 'controledBalls',
+            'Intcp' => 'interceptedBalls',
+            'Steal' => 'stealedBalls',
+            'TkOff' => 'takedoffBalls',
+        ], $avgs);
+
+        // ── Sub-table 4: Dribble & Challenge ──────────────────────────────────
+        $this->printExtremesTable('Dribble & Challenge', [
+            'DribDone' => 'dribbleDone',
+            'DribFail' => 'dribbleFailed',
+            'ChMe'     => 'challengedMeWithBall',
+            'ChRiv'    => 'challengedRivalWithBall',
+        ], $avgs);
+
+        // ── Sub-table 5: Distance ─────────────────────────────────────────────
+        $this->printExtremesTable('Distance', [
+            'Dist'     => 'distanceTraveled',
+            'DistBall' => 'distanceTraveledWithBall',
+        ], $avgs, 0);
 
         $this->out("\n");
         $this->assertTrue(true);
@@ -209,65 +256,163 @@ class BalanceReportTest extends BalanceTestCase
     // =========================================================================
 
     /**
-     * Run a full attribute sweep for one attribute and print two sub-tables.
+     * Run a full attribute sweep for one attribute and print five sub-tables
+     * covering all PlayerSummary stats.
      */
     private function printAttributeSweep(string $attr): void
     {
-        $neutral = $this->makeTeam();
-
-        // Collect results indexed by string key to avoid float→int key coercion.
         $data = [];
         foreach (self::SWEEP_VALUES as $val) {
             $data[(string)$val] = $this->runMatchSet(
-                $this->makeTeam([$attr => $val]),
-                $neutral,
+                fn() => $this->makeTeam([$attr => $val]),
+                fn() => $this->makeTeam(),
                 self::SWEEP_MATCHES
             );
         }
 
         $this->out("\n  ── $attr ──\n");
 
-        // Table A: goals / possession / shots
-        $this->out(sprintf(
-            "  %-5s │ %-6s │ %-6s │ %-7s │ %-9s │ %-9s │ %-8s │ %-8s\n",
-            'Val', 'Gls-A', 'Gls-B', 'G-Diff', 'Poss-A%', 'Poss-B%', 'Shots-A', 'Shots-B'
-        ));
-        $this->out('  ' . str_repeat('─', 76) . "\n");
+        $this->printSweepTable('Goals & Possession', [
+            ['label' => 'Gls-A',   'w' => 6,  'fmt' => fn($a) => number_format($a['goalsA'], 1)],
+            ['label' => 'Gls-B',   'w' => 6,  'fmt' => fn($a) => number_format($a['goalsB'], 1)],
+            ['label' => 'G-Diff',  'w' => 7,  'fmt' => fn($a) => sprintf('%+.1f', $a['goalsA'] - $a['goalsB'])],
+            ['label' => 'Poss-A%', 'w' => 9,  'fmt' => fn($a) => number_format($a['possessionA'] * 100, 1) . '%'],
+            ['label' => 'Poss-B%', 'w' => 9,  'fmt' => fn($a) => number_format($a['possessionB'] * 100, 1) . '%'],
+        ], $data);
 
-        foreach (self::SWEEP_VALUES as $val) {
-            $avg = $data[(string)$val];
-            $this->out(sprintf(
-                "  %-5s │ %-6s │ %-6s │ %-7s │ %-9s │ %-9s │ %-8s │ %-8s\n",
-                $val,
-                number_format($avg['goalsA'], 1),
-                number_format($avg['goalsB'], 1),
-                sprintf('%+.1f', $avg['goalsA'] - $avg['goalsB']),
-                number_format($avg['possessionA'] * 100, 1) . '%',
-                number_format($avg['possessionB'] * 100, 1) . '%',
-                number_format($avg['teamA']['shootMade'], 1),
-                number_format($avg['teamB']['shootMade'], 1)
-            ));
+        $this->printSweepTable('Shooting & Passing', [
+            ['label' => 'Shots-A',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['shootMade'], 1)],
+            ['label' => 'Shots-B',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['shootMade'], 1)],
+            ['label' => 'PasMd-A',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['passesMade'], 1)],
+            ['label' => 'PasMd-B',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['passesMade'], 1)],
+            ['label' => 'PasAc-A',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['passesAchieved'], 1)],
+            ['label' => 'PasAc-B',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['passesAchieved'], 1)],
+        ], $data);
+
+        $this->printSweepTable('Ball Control', [
+            ['label' => 'Ctrl-A',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['controledBalls'], 1)],
+            ['label' => 'Ctrl-B',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['controledBalls'], 1)],
+            ['label' => 'Intcp-A', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['interceptedBalls'], 1)],
+            ['label' => 'Intcp-B', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['interceptedBalls'], 1)],
+            ['label' => 'Steal-A', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['stealedBalls'], 1)],
+            ['label' => 'Steal-B', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['stealedBalls'], 1)],
+            ['label' => 'TkOff-A', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['takedoffBalls'], 1)],
+            ['label' => 'TkOff-B', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['takedoffBalls'], 1)],
+        ], $data);
+
+        $this->printSweepTable('Dribble & Challenge', [
+            ['label' => 'DribD-A', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['dribbleDone'], 1)],
+            ['label' => 'DribD-B', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['dribbleDone'], 1)],
+            ['label' => 'DribF-A', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['dribbleFailed'], 1)],
+            ['label' => 'DribF-B', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['dribbleFailed'], 1)],
+            ['label' => 'ChMe-A',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['challengedMeWithBall'], 1)],
+            ['label' => 'ChMe-B',  'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['challengedMeWithBall'], 1)],
+            ['label' => 'ChRiv-A', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamA']['challengedRivalWithBall'], 1)],
+            ['label' => 'ChRiv-B', 'w' => 8, 'fmt' => fn($a) => number_format($a['teamB']['challengedRivalWithBall'], 1)],
+        ], $data);
+
+        $this->printSweepTable('Distance', [
+            ['label' => 'Dist-A',     'w' => 9,  'fmt' => fn($a) => number_format($a['teamA']['distanceTraveled'], 0)],
+            ['label' => 'Dist-B',     'w' => 9,  'fmt' => fn($a) => number_format($a['teamB']['distanceTraveled'], 0)],
+            ['label' => 'DistBall-A', 'w' => 10, 'fmt' => fn($a) => number_format($a['teamA']['distanceTraveledWithBall'], 0)],
+            ['label' => 'DistBall-B', 'w' => 10, 'fmt' => fn($a) => number_format($a['teamB']['distanceTraveledWithBall'], 0)],
+        ], $data);
+    }
+
+    /**
+     * Print one sweep sub-table.
+     *
+     * @param array $cols  Each element: ['label' => string, 'w' => int, 'fmt' => callable($avg): string]
+     * @param array $data  Keyed by string sweep value → runMatchSet result.
+     */
+    private function printSweepTable(string $label, array $cols, array $data): void
+    {
+        $lineW = 5; // 'Val' column
+        foreach ($cols as $col) {
+            $lineW += 3 + $col['w']; // ' │ ' + content
         }
 
-        // Table B: ball-event metrics
-        $this->out(sprintf(
-            "\n  %-5s │ %-10s │ %-10s │ %-10s │ %-10s │ %-11s │ %-11s\n",
-            'Val', 'Ctrl-A', 'Ctrl-B', 'Steals-A', 'Steals-B', 'DribFail-A', 'DribFail-B'
-        ));
-        $this->out('  ' . str_repeat('─', 80) . "\n");
+        $this->out("\n  $label\n");
+
+        $header = sprintf("  %-5s", 'Val');
+        foreach ($cols as $col) {
+            $header .= sprintf(" │ %-{$col['w']}s", $col['label']);
+        }
+        $this->out($header . "\n" . '  ' . str_repeat('─', $lineW) . "\n");
 
         foreach (self::SWEEP_VALUES as $val) {
             $avg = $data[(string)$val];
-            $this->out(sprintf(
-                "  %-5s │ %-10s │ %-10s │ %-10s │ %-10s │ %-11s │ %-11s\n",
-                $val,
-                number_format($avg['teamA']['controledBalls'], 1),
-                number_format($avg['teamB']['controledBalls'], 1),
-                number_format($avg['teamA']['stealedBalls'], 1),
-                number_format($avg['teamB']['stealedBalls'], 1),
-                number_format($avg['teamA']['dribbleFailed'], 1),
-                number_format($avg['teamB']['dribbleFailed'], 1)
-            ));
+            $row = sprintf("  %-5s", $val);
+            foreach ($cols as $col) {
+                $row .= sprintf(" │ %-{$col['w']}s", ($col['fmt'])($avg));
+            }
+            $this->out($row . "\n");
+        }
+    }
+
+    /**
+     * Print one extremes sub-table (Hi = attr 0.9 team, Lo = attr 0.1 team).
+     *
+     * @param array  $stats  ['ColumnLabel' => 'statKey', ...]
+     * @param array  $avgs   ['attrName' => runMatchSet result, ...]
+     * @param int    $decimals  Decimal places for number_format (default 1).
+     */
+    private function printExtremesTable(string $label, array $stats, array $avgs, int $decimals = 1): void
+    {
+        // colW must fit the longest "Label-Hi" / "Label-Lo" header string.
+        $colW = max(7, max(array_map(fn($l) => strlen($l) + 3, array_keys($stats))));
+
+        $lineW = 14; // 'Attribute' column
+        foreach ($stats as $ignored) {
+            $lineW += (3 + $colW) * 2; // two cols (Hi + Lo) per stat
+        }
+
+        $this->out("\n  $label\n");
+
+        $header = sprintf("  %-14s", 'Attribute');
+        foreach (array_keys($stats) as $statLabel) {
+            $header .= sprintf(" │ %-{$colW}s │ %-{$colW}s", $statLabel . '-Hi', $statLabel . '-Lo');
+        }
+        $this->out($header . "\n" . '  ' . str_repeat('─', $lineW) . "\n");
+
+        foreach (self::ATTRIBUTES as $attr) {
+            $avg = $avgs[$attr];
+            $row = sprintf("  %-14s", $attr);
+            foreach ($stats as $statKey) {
+                $row .= sprintf(" │ %-{$colW}s │ %-{$colW}s",
+                    number_format($avg['teamA'][$statKey], $decimals),
+                    number_format($avg['teamB'][$statKey], $decimals)
+                );
+            }
+            $this->out($row . "\n");
+        }
+    }
+
+    /**
+     * Print one correlation sub-table (attributes as rows, outcomes as columns).
+     *
+     * @param array $rows      Collected sample rows with attribute and outcome keys.
+     * @param array $outcomes  ['rowKey' => 'ColumnLabel', ...]
+     */
+    private function printCorrelationGroup(array $rows, array $outcomes): void
+    {
+        $colW  = 10;
+        $lineW = 14 + ($colW + 3) * count($outcomes);
+
+        $header = sprintf("  %-14s", 'Attribute');
+        foreach ($outcomes as $label) {
+            $header .= sprintf(" │ %-{$colW}s", $label);
+        }
+        $this->out($header . "\n" . '  ' . str_repeat('─', $lineW) . "\n");
+
+        foreach (self::ATTRIBUTES as $attr) {
+            $xs  = array_column($rows, $attr);
+            $row = sprintf("  %-14s", $attr);
+            foreach (array_keys($outcomes) as $outcome) {
+                $r   = $this->pearson($xs, array_column($rows, $outcome));
+                $row .= sprintf(" │ %-{$colW}s", sprintf('%+.2f', $r));
+            }
+            $this->out($row . "\n");
         }
     }
 

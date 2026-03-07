@@ -63,6 +63,38 @@ abstract class BalanceTestCase extends TestCase
         ['x' => 70, 'y' => 40],   // striker
     ];
 
+    /**
+     * Real team formations. When makeTeam() is called without explicit rules/zones,
+     * one of these is picked at random. Each entry is a 3-player array where every
+     * player carries its own rules and defaultZone.
+     */
+    private const FORMATIONS = [
+        // Offensive FC
+        [
+            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 20]],
+            ['rules' => [[['condition' => 'The ball is in other side', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 30, 'y' => 60]],
+            ['rules' => [[['condition' => 'The ball is in other side', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 65, 'y' => 80]],
+        ],
+        // Turtles
+        [
+            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is near my goal', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 15]],
+            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Go to near rival']]], 'defaultZone' => ['x' => 35, 'y' => 35]],
+            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 65, 'y' => 50]],
+        ],
+        // Team A
+        [
+            ['rules' => [[['condition' => 'I am marked', 'action' => 'Change side'], ['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is near my goal', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 20]],
+            ['rules' => [[['condition' => 'The ball is in other side', 'action' => 'Pass the ball'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Go to near rival']]], 'defaultZone' => ['x' => 50, 'y' => 50]],
+            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward'], ['condition' => 'I am near a rival', 'action' => 'Change side']], [['condition' => 'The ball is in other side', 'action' => 'Go to the ball'], ['condition' => 'Rival in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Change side']]], 'defaultZone' => ['x' => 75, 'y' => 70]],
+        ],
+        // Pomarola Mecánica
+        [
+            ['rules' => [[['condition' => 'I has the ball', 'action' => 'Pass the ball']], [['condition' => 'The ball is near my goal', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 20]],
+            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I am near a rival', 'action' => 'Pass the ball'], ['condition' => 'I has the ball', 'action' => 'Go forward']], [['condition' => 'The ball is in my side', 'action' => 'Go to the ball'], ['condition' => 'I am near a rival', 'action' => 'Go to near rival']]], 'defaultZone' => ['x' => 50, 'y' => 40]],
+            ['rules' => [[['condition' => 'The ball is near rival goal', 'action' => 'Shoot to goal'], ['condition' => 'I has the ball', 'action' => 'Go forward'], ['condition' => 'I am marked', 'action' => 'Change side']], [['condition' => 'The ball is in other side', 'action' => 'Go to the ball']]], 'defaultZone' => ['x' => 50, 'y' => 60]],
+        ],
+    ];
+
     // -------------------------------------------------------------------------
     // PUBLIC HELPERS
     // -------------------------------------------------------------------------
@@ -89,11 +121,26 @@ abstract class BalanceTestCase extends TestCase
             'dribble'         => 0.5,
             'strength'        => 0.5,
             'endurance'       => 0.5,
-            'scanWithBall'    => null,
-            'scanWithoutBall' => null,
+            'scanWithBall'    => 0.5,
+            'scanWithoutBall' => 0.5,
         ];
 
         $resolvedStats = array_merge($defaults, $stats);
+
+        // No explicit rules or zones → pick one of the real formations at random.
+        if ($rules === null && $zones === null) {
+            $formation = self::FORMATIONS[array_rand(self::FORMATIONS)];
+            $players   = [];
+            foreach ($formation as $i => $playerDef) {
+                $players[] = array_merge($resolvedStats, [
+                    'name'        => 'P' . ($i + 1),
+                    'rules'       => $playerDef['rules'],
+                    'defaultZone' => $playerDef['defaultZone'],
+                ]);
+            }
+            return ['players' => $players];
+        }
+
         $resolvedRules = $rules ?? self::ACTIVE_RULES;
         $resolvedZones = $zones ?? self::DEFAULT_ZONES;
 
@@ -139,14 +186,16 @@ abstract class BalanceTestCase extends TestCase
      * Useful for smoothing out the variance of individual matches.
      */
     protected function runMatchSet(
-        array $teamA,
-        array $teamB,
-        int   $matches = self::MATCHES_PER_SET,
-        int   $ticks   = self::TICKS_PER_MATCH
+        array|callable $teamA,
+        array|callable $teamB,
+        int            $matches = self::MATCHES_PER_SET,
+        int            $ticks   = self::TICKS_PER_MATCH
     ): array {
         $results = [];
         for ($i = 0; $i < $matches; $i++) {
-            $results[] = $this->runMatch($teamA, $teamB, $ticks);
+            $a = is_callable($teamA) ? ($teamA)() : $teamA;
+            $b = is_callable($teamB) ? ($teamB)() : $teamB;
+            $results[] = $this->runMatch($a, $b, $ticks);
         }
         return $this->averageResults($results);
     }

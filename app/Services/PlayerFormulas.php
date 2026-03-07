@@ -14,10 +14,10 @@ class PlayerFormulas
     // SCAN PERIOD
     // -------------------------------------------------------------------------
     const SCAN_WITH_BALL_MIN = 80;   // ticks at value=1 (fast scan)
-    const SCAN_WITH_BALL_MAX = 800;  // ticks at value=0 (slow scan)
+    const SCAN_WITH_BALL_MAX = 2000;  // ticks at value=0 (slow scan)
 
     const SCAN_WITHOUT_BALL_MIN = 60;   // ticks at value=1
-    const SCAN_WITHOUT_BALL_MAX = 600;  // ticks at value=0
+    const SCAN_WITHOUT_BALL_MAX = 1500;  // ticks at value=0
 
     public static function scanPeriodWithBall(float $value): int
     {
@@ -35,7 +35,7 @@ class PlayerFormulas
     // MAX SPEED
     // -------------------------------------------------------------------------
     const MAX_SPEED_MIN = 1.0;  // units/tick at value=0
-    const MAX_SPEED_MAX = 3.0;  // units/tick at value=1
+    const MAX_SPEED_MAX = 5.0;  // units/tick at value=1
 
     /** Convert a maxSpeed attribute (0–1) to base movement speed. */
     public static function maxSpeed(float $value): float
@@ -48,7 +48,7 @@ class PlayerFormulas
     // ACCURACY
     // -------------------------------------------------------------------------
     const ACCURACY_DEVIATION_MIN = 0.0;   // pixels at value=1 (perfect accuracy)
-    const ACCURACY_DEVIATION_MAX = 80.0;  // pixels at value=0 (very inaccurate)
+    const ACCURACY_DEVIATION_MAX = 200.0;  // pixels at value=0 (very inaccurate)
 
     /** Convert an accuracy attribute (0–1) to random deviation in pixels for pass/shot targets. */
     public static function accuracyDeviation(float $value): float
@@ -60,7 +60,7 @@ class PlayerFormulas
     // -------------------------------------------------------------------------
     // CONTROL
     // -------------------------------------------------------------------------
-    const CONTROL_SPEED_MIN = 3.0;  // ball speed threshold at value=0 (poor control)
+    const CONTROL_SPEED_MIN = 1.0;  // ball speed threshold at value=0 (poor control)
     const CONTROL_SPEED_MAX = 9.0;  // ball speed threshold at value=1 (great control)
 
     /** Convert a control attribute (0–1) to the maximum ball speed at which the player can take possession. */
