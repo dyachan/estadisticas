@@ -138,6 +138,7 @@ class MatchSimulation
     {
         // advance simulation tick
         $this->tickNumber++;
+        $tickGoal = null;
 
         // BALL MOVEMENT
 
@@ -159,7 +160,8 @@ class MatchSimulation
                 $this->ball->x < ($this->width + self::GOAL_SIZE) / 2){
                 if($this->ball->y < $ballOffset){
                     $this->summary->goalsB++;
-                    
+                    $tickGoal = "Team B";
+
                     if(!$this->lastPlayerWithBall){
                         $this->log("Team B get a goal");
                     } else {
@@ -172,6 +174,7 @@ class MatchSimulation
                     }
                 } else {
                     $this->summary->goalsA++;
+                    $tickGoal = "Team A";
 
                     if(!$this->lastPlayerWithBall){
                         $this->log("Team A get a goal");
@@ -254,21 +257,12 @@ class MatchSimulation
         $this->handleBallPossession();
 
         $this->tickHistoric[] = [
-            "ball" => [
-                "x" => $this->ball->x,
-                "y" => $this->ball->y,
-            ],
-            "teamA" => [
-                "goalkeeper" => $this->players[0]->getRenderData(),
-                "defender" => $this->players[1]->getRenderData(),
-                "striker" => $this->players[2]->getRenderData(),
-            ],
-            "teamB" => [
-                "goalkeeper" => $this->players[3]->getRenderData(),
-                "defender" => $this->players[4]->getRenderData(),
-                "striker" => $this->players[5]->getRenderData(),
-            ],
-            "logs" => $this->logs
+            "ball"      => ["x" => $this->ball->x, "y" => $this->ball->y],
+            "teamA"     => array_map(fn($p) => $p->getRenderData(), array_slice($this->players, 0, 3)),
+            "teamB"     => array_map(fn($p) => $p->getRenderData(), array_slice($this->players, 3, 3)),
+            "ownerTeam" => $this->currentPlayerWithBall?->team,
+            "goal"      => $tickGoal,
+            "logs"      => $this->logs,
         ];
         $this->logs = [];
 

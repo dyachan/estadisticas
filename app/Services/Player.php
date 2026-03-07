@@ -116,12 +116,14 @@ class Player
 
     public function getRenderData(){
         return [
+            'name' => $this->name,
             'x' => $this->x, 'y' => $this->y,
             'condition' => $this->currentCondition,
             'ballCooldown' => $this->ballCooldown,
             'bodyCooldown' => $this->bodyCooldown,
             'marked' => $this->marked,
             'currentStrength' => $this->currentStrength,
+            'hasBall' => $this->hasBall,
         ];
     }
 

@@ -7,15 +7,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TeamResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     */
     public function toArray(Request $request): array
     {
         return [
-            'name'      => $this->name,
-            'formation' => $this->formation,
-            'elo'       => $this->elo
+            'id'             => $this->id,
+            'name'           => $this->name,
+            'wins'           => $this->wins,
+            'draws'          => $this->draws,
+            'losses'         => $this->losses,
+            'matches_played' => $this->matches_played,
+            'configuration'  => $this->configuration ?? [],
         ];
     }
 }

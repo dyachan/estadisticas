@@ -6,23 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('name')->unique();
+            $table->json('configuration')->nullable();
+            $table->unsignedInteger('wins')->default(0);
+            $table->unsignedInteger('draws')->default(0);
+            $table->unsignedInteger('losses')->default(0);
+            $table->unsignedInteger('matches_played')->default(0);
             $table->timestamps();
-            $table->string('name');
-            $table->text('formation');
-            $table->integer('elo')->default(0);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('teams');
