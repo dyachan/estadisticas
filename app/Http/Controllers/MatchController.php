@@ -75,6 +75,7 @@ class MatchController extends Controller
                 'losses'         => $team->losses,
                 'matches_played' => $team->matches_played,
             ],
+            'match'          => $simulation->tickHistoric,
             'summary'        => $summary,
         ]);
     }
