@@ -265,7 +265,7 @@ class RoguelikeController extends Controller
             'goals_against' => $goalsAgainst,
             'match'         => $simResult['match'],
             'summary'       => $summary,
-            'opponent'      => ['name' => $opponentName],
+            'opponent'      => ['name' => $opponentName, 'players' => $opponentPlayers],
             'team'          => [
                 'wins'           => $team->wins,
                 'draws'          => $team->draws,
