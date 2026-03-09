@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class GameTeam extends Model
 {
-    protected $fillable = ['user_id', 'name'];
+    protected $fillable = ['user_id', 'name', 'wins', 'draws', 'losses', 'matches_played'];
 
     public function user(): BelongsTo
     {

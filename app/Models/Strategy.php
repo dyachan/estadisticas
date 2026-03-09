@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Strategy extends Model
 {
-    protected $fillable = ['game_team_id'];
+    protected $fillable = ['game_team_id', 'formation'];
+
+    protected $casts = ['formation' => 'array'];
 
     public function gameTeam(): BelongsTo
     {

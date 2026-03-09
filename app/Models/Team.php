@@ -58,8 +58,8 @@ class Team extends Model
             'dribble'         => $p['dribble']           ?? 0.5,
             'strength'        => $p['strength']          ?? 0.5,
             'endurance'       => $p['endurance']         ?? 0.5,
-            'scanWithBall'    => $p['scan_with_ball']    ?? null,
-            'scanWithoutBall' => $p['scan_without_ball'] ?? null,
+            'scanWithBall'    => $p['scan_with_ball']    ?? 0.5,
+            'scanWithoutBall' => $p['scan_without_ball'] ?? 0.5,
         ])->values()->all();
 
         return ['players' => $players];

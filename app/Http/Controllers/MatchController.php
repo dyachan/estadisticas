@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Team;
 use App\Models\GameMatch;
 use Illuminate\Http\Request;
-use App\Services\MatchSimulation;
 use App\Services\MatchmakingService;
 
 class MatchController extends Controller
@@ -29,14 +28,8 @@ class MatchController extends Controller
         }
 
         // Run simulation (team is always Team A)
-        $simulation = app(MatchSimulation::class);
-        $simulation->loadTeams($team->toSimulationFormat(), $opponent->toSimulationFormat());
-
-        for ($i = 1; $i <= MatchSimulation::TICKS_PER_MATCH; $i++) {
-            $simulation->update();
-        }
-
-        $summary = $simulation->getSummary();
+        $simResult    = SimulationController::runSimulation($team->toSimulationFormat(), $opponent->toSimulationFormat());
+        $summary      = $simResult['summary'];
         $goalsFor     = (int) $summary['GoalsA'];
         $goalsAgainst = (int) $summary['GoalsB'];
         $result = match(true) {
@@ -46,12 +39,14 @@ class MatchController extends Controller
         };
 
         // Persist match record
-        GameMatch::create([
+        $gameMatch = GameMatch::create([
             'team_id'           => $team->id,
+            'home_snapshot'     => $team->toSnapshot(),
             'opponent_snapshot' => $opponent->toSnapshot(),
             'goals_for'         => $goalsFor,
             'goals_against'     => $goalsAgainst,
             'result'            => $result,
+            'replay'            => $simResult['match'],
         ]);
 
         // Update initiating team counters
@@ -65,6 +60,7 @@ class MatchController extends Controller
         $team->save();
 
         return response()->json([
+            'match_id'       => $gameMatch->id,
             'result'         => $result,
             'goals_for'      => $goalsFor,
             'goals_against'  => $goalsAgainst,
@@ -75,7 +71,6 @@ class MatchController extends Controller
                 'losses'         => $team->losses,
                 'matches_played' => $team->matches_played,
             ],
-            'match'          => $simulation->tickHistoric,
             'summary'        => $summary,
         ]);
     }
@@ -97,5 +92,16 @@ class MatchController extends Controller
             ]);
 
         return response()->json($matches);
+    }
+
+    /**
+     * Get the full replay for a single match.
+     */
+    public function replay(GameMatch $match)
+    {
+        return response()->json([
+            'id'     => $match->id,
+            'replay' => $match->replay,
+        ]);
     }
 }

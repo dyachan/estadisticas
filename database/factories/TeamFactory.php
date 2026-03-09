@@ -14,7 +14,7 @@ class TeamFactory extends Factory
         $defaults = [
             'max_speed' => 0.5, 'accuracy' => 0.5, 'control' => 0.5,
             'reaction'  => 0.5, 'dribble'  => 0.5, 'strength' => 0.5,
-            'endurance' => 0.5, 'scan_with_ball' => null, 'scan_without_ball' => null,
+            'endurance' => 0.5, 'scan_with_ball' => 0.5, 'scan_without_ball' => 0.5,
             'rules_with_ball' => [], 'rules_without_ball' => [],
         ];
 

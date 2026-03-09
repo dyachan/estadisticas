@@ -37,8 +37,8 @@ class TeamController extends Controller
             'dribble'            => 0.5,
             'strength'           => 0.5,
             'endurance'          => 0.5,
-            'scan_with_ball'     => null,
-            'scan_without_ball'  => null,
+            'scan_with_ball'     => 0.5,
+            'scan_without_ball'  => 0.5,
             'rules_with_ball'    => [],
             'rules_without_ball' => [],
         ], $p))->values()->all();
