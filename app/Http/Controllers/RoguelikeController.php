@@ -153,8 +153,12 @@ class RoguelikeController extends Controller
         })->values()->all();
 
         $strategy = Strategy::create([
-            'game_team_id' => $team->id,
-            'formation'    => $formation,
+            'game_team_id'   => $team->id,
+            'formation'      => $formation,
+            'wins'           => $team->wins,
+            'draws'          => $team->draws,
+            'losses'         => $team->losses,
+            'matches_played' => $team->matches_played,
         ]);
 
         // 3. Build home simulation format from formation
@@ -173,19 +177,23 @@ class RoguelikeController extends Controller
             'scanWithoutBall' => $p['scan_without_ball'],
         ])->values()->all();
 
-        // 4. Find real opponent GameTeam or fall back to CPU
-        $opponentTeam = GameTeam::where('id', '!=', $team->id)
+        // 4. Find opponent Strategy snapshot with similar counters, or fall back to CPU
+        $latestStrategyIds = Strategy::selectRaw('MAX(id) as id')
+            ->where('game_team_id', '!=', $team->id)
+            ->groupBy('game_team_id')
+            ->pluck('id');
+
+        $opponentStrategy = Strategy::whereIn('id', $latestStrategyIds)
             ->where('matches_played', '>', 0)
             ->get()
             ->sortBy([
-                fn($a, $b) => abs($a->losses - $team->losses)         <=> abs($b->losses - $team->losses),
+                fn($a, $b) => abs($a->losses - $team->losses)                 <=> abs($b->losses - $team->losses),
                 fn($a, $b) => abs($a->matches_played - $team->matches_played) <=> abs($b->matches_played - $team->matches_played),
-                fn($a, $b) => abs($a->wins - $team->wins)             <=> abs($b->wins - $team->wins),
-                fn($a, $b) => abs($a->draws - $team->draws)           <=> abs($b->draws - $team->draws),
+                fn($a, $b) => abs($a->wins - $team->wins)                     <=> abs($b->wins - $team->wins),
+                fn($a, $b) => abs($a->draws - $team->draws)                   <=> abs($b->draws - $team->draws),
             ])
             ->first();
 
-        $opponentStrategy   = $opponentTeam?->currentStrategy();
         $opponentStrategyId = null;
         $opponentTeamId     = null;
 
@@ -204,6 +212,7 @@ class RoguelikeController extends Controller
                 'scanWithBall'    => $p['scan_with_ball'],
                 'scanWithoutBall' => $p['scan_without_ball'],
             ])->values()->all();
+            $opponentTeam       = $opponentStrategy->gameTeam;
             $opponentName       = $opponentTeam->name;
             $opponentTeamId     = $opponentTeam->id;
             $opponentStrategyId = $opponentStrategy->id;
@@ -259,13 +268,23 @@ class RoguelikeController extends Controller
         $team->$counterColumn += 1;
         $team->save();
 
+        $opponentCounters = $opponentStrategy ? [
+            'wins'           => $opponentStrategy->wins,
+            'draws'          => $opponentStrategy->draws,
+            'losses'         => $opponentStrategy->losses,
+            'matches_played' => $opponentStrategy->matches_played,
+        ] : null;
+
         return response()->json([
             'result'        => $result,
             'goals_for'     => $goalsFor,
             'goals_against' => $goalsAgainst,
             'match'         => $simResult['match'],
             'summary'       => $summary,
-            'opponent'      => ['name' => $opponentName, 'players' => $opponentPlayers],
+            'opponent'      => array_merge(
+                ['name' => $opponentName, 'players' => $opponentPlayers],
+                $opponentCounters ?? []
+            ),
             'team'          => [
                 'wins'           => $team->wins,
                 'draws'          => $team->draws,

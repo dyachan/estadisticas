@@ -305,6 +305,9 @@ class Player
         if ($shouldRefresh) {
             $this->refreshMemory($simState);
         } else {
+            // always update ball team
+            $this->memory->ballTeam = $simState->ballTeam;
+
             // Use cached memory but update near ball and players
             if($this->distanceTo($simState->ball) < $this->assistDistance){
                 $this->memory->ball = $simState->ball;
