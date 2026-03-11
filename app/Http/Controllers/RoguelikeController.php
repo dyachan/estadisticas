@@ -177,65 +177,76 @@ class RoguelikeController extends Controller
             'scanWithoutBall' => $p['scan_without_ball'],
         ])->values()->all();
 
-        // 4. Find opponent Strategy snapshot with similar counters, or fall back to CPU
+        // 4. Find opponent Strategy snapshot matching the player's record, or fall back to CPU
         $latestStrategyIds = Strategy::selectRaw('MAX(id) as id')
             ->where('game_team_id', '!=', $team->id)
             ->groupBy('game_team_id')
             ->pluck('id');
 
-        $opponentStrategy = Strategy::whereIn('id', $latestStrategyIds)
-            ->where('matches_played', '>', 0)
-            ->get()
-            ->sortBy([
-                fn($a, $b) => abs($a->losses - $team->losses)                 <=> abs($b->losses - $team->losses),
-                fn($a, $b) => abs($a->matches_played - $team->matches_played) <=> abs($b->matches_played - $team->matches_played),
-                fn($a, $b) => abs($a->wins - $team->wins)                     <=> abs($b->wins - $team->wins),
-                fn($a, $b) => abs($a->draws - $team->draws)                   <=> abs($b->draws - $team->draws),
-            ])
-            ->first();
+        $noOpponentAtLevel = false;
+        $opponentStrategy  = null;
+
+        // Step 1: same matches_played (set PJ)
+        $setPJ = Strategy::whereIn('id', $latestStrategyIds)
+            ->where('matches_played', $team->matches_played)
+            ->get();
+
+        if ($setPJ->isEmpty()) {
+            $noOpponentAtLevel = true;
+        } else {
+            // Step 2: same wins (set PG), fallback to random PJ
+            $setPG = $setPJ->where('wins', $team->wins)->values();
+
+            if ($setPG->isEmpty()) {
+                $opponentStrategy = $setPJ->random();
+            } else {
+                // Step 3: same draws (set PE), fallback to random PG
+                $setPE = $setPG->where('draws', $team->draws)->values();
+
+                if ($setPE->isEmpty()) {
+                    $opponentStrategy = $setPG->random();
+                } else {
+                    // Step 4: same losses, fallback to random PE
+                    $setFinal = $setPE->where('losses', $team->losses)->values();
+                    $opponentStrategy = ($setFinal->isEmpty() ? $setPE : $setFinal)->random();
+                }
+            }
+        }
+
+        // No opponent at this level: return early without running the simulation
+        if ($noOpponentAtLevel) {
+            return response()->json([
+                'no_opponent_at_level' => true,
+                'team' => [
+                    'wins'           => $team->wins,
+                    'draws'          => $team->draws,
+                    'losses'         => $team->losses,
+                    'matches_played' => $team->matches_played,
+                ],
+            ]);
+        }
 
         $opponentStrategyId = null;
         $opponentTeamId     = null;
 
-        if ($opponentStrategy?->formation) {
-            $opponentPlayers = collect($opponentStrategy->formation)->map(fn($p) => [
-                'name'            => $p['name'],
-                'rules'           => [$p['rules_with_ball'] ?? [], $p['rules_without_ball'] ?? []],
-                'defaultZone'     => ['x' => $p['default_zone_x'], 'y' => $p['default_zone_y']],
-                'maxSpeed'        => $p['max_speed'],
-                'accuracy'        => $p['accuracy'],
-                'control'         => $p['control'],
-                'reaction'        => $p['reaction'],
-                'dribble'         => $p['dribble'],
-                'strength'        => $p['strength'],
-                'endurance'       => $p['endurance'],
-                'scanWithBall'    => $p['scan_with_ball'],
-                'scanWithoutBall' => $p['scan_without_ball'],
-            ])->values()->all();
-            $opponentTeam       = $opponentStrategy->gameTeam;
-            $opponentName       = $opponentTeam->name;
-            $opponentTeamId     = $opponentTeam->id;
-            $opponentStrategyId = $opponentStrategy->id;
-        } else {
-            // CPU fallback scaled by team's matches_played
-            $cpuStat         = min(0.1 + $team->matches_played * 0.05, 0.8);
-            $cpuDefaultZones = [['x' => 50, 'y' => 25], ['x' => 30, 'y' => 50], ['x' => 70, 'y' => 70]];
-            $cpuRules        = [
-                [['condition' => 1, 'action' => 9], ['condition' => 7, 'action' => 5]],
-                [['condition' => 4, 'action' => 4], ['condition' => 5, 'action' => 2]],
-            ];
-            $opponentPlayers = collect(range(0, 2))->map(fn($i) => [
-                'name'            => 'CPU ' . ['GK', 'DEF', 'FWD'][$i],
-                'rules'           => $cpuRules,
-                'defaultZone'     => $cpuDefaultZones[$i],
-                'maxSpeed'        => $cpuStat, 'accuracy'        => $cpuStat,
-                'control'         => $cpuStat, 'reaction'        => $cpuStat,
-                'dribble'         => $cpuStat, 'strength'        => $cpuStat,
-                'endurance'       => $cpuStat, 'scanWithBall'    => $cpuStat,
-                'scanWithoutBall' => $cpuStat,
-            ])->values()->all();
-            $opponentName = 'CPU #' . ($team->matches_played + 1);
-        }
+        $opponentPlayers = collect($opponentStrategy->formation)->map(fn($p) => [
+            'name'            => $p['name'],
+            'rules'           => [$p['rules_with_ball'] ?? [], $p['rules_without_ball'] ?? []],
+            'defaultZone'     => ['x' => $p['default_zone_x'], 'y' => $p['default_zone_y']],
+            'maxSpeed'        => $p['max_speed'],
+            'accuracy'        => $p['accuracy'],
+            'control'         => $p['control'],
+            'reaction'        => $p['reaction'],
+            'dribble'         => $p['dribble'],
+            'strength'        => $p['strength'],
+            'endurance'       => $p['endurance'],
+            'scanWithBall'    => $p['scan_with_ball'],
+            'scanWithoutBall' => $p['scan_without_ball'],
+        ])->values()->all();
+        $opponentTeam       = $opponentStrategy->gameTeam;
+        $opponentName       = $opponentTeam->name;
+        $opponentTeamId     = $opponentTeam->id;
+        $opponentStrategyId = $opponentStrategy->id;
 
         // 5. Run simulation
         $simResult    = SimulationController::runSimulation(
@@ -268,6 +279,11 @@ class RoguelikeController extends Controller
         $team->$counterColumn += 1;
         $team->save();
 
+        // 8. Pioneer check: is this team now at a matches_played level no other team has reached?
+        $isPioneer = !Strategy::whereIn('id', $latestStrategyIds)
+            ->where('matches_played', $team->matches_played)
+            ->exists();
+
         $opponentCounters = $opponentStrategy ? [
             'wins'           => $opponentStrategy->wins,
             'draws'          => $opponentStrategy->draws,
@@ -276,6 +292,8 @@ class RoguelikeController extends Controller
         ] : null;
 
         return response()->json([
+            'no_opponent_at_level' => $noOpponentAtLevel,
+            'is_pioneer'    => $isPioneer,
             'result'        => $result,
             'goals_for'     => $goalsFor,
             'goals_against' => $goalsAgainst,

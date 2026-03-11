@@ -53,3 +53,35 @@ Each player has nine attributes that affect how they perform during the simulati
 * **Dribble**: *Resistance to being tackled when carrying the ball.*
 * **Strength**: *Affects movement speed and the power behind passes and shots. Depletes with physical effort and recovers during rest.*
 * **Endurance**: *The rate at which strength recovers over time.*
+
+---
+
+## Roguelike Mode
+
+Roguelike mode turns the simulator into a single-player progression experience. Instead of configuring two teams freely, the user builds one team and climbs a ladder by facing real strategies uploaded by other players.
+
+### How a run works
+
+1. **Start** — The user enters roguelike mode and names their team.
+2. **Play Turn** — The user sends their current formation to the server. The server finds the best-matching opponent, runs the simulation, and returns the result and a full match replay.
+3. **Next Turn** — The user distributes stats points across each player attributes and adjusts rules.
+5. **Game over** — The run ends when the team accumulates **5 losses**. The user can start a new run at any time.
+
+### Stat progression
+
+Each player starts with all nine attributes at **0.1**. After every completed turn the user can distribute **0.5 additional points** per player. Previously assigned points become the new floor — they cannot be reduced.
+
+### Rule progression
+
+Players start with 1 rule per condition block. Every 3 completed turns they gain experience and can receive one extra order.
+
+### Matchmaking
+
+The server tries to find the most closely matched opponent by cascading through the following filters, each time falling back to the previous set if the narrower set is empty:
+
+1. **Same matches played** — only strategies from teams at the same stage of their run.
+2. **Same wins** — among those, teams with the same number of wins.
+3. **Same draws** — further narrowed by draw count.
+4. **Same losses** — the closest possible record match, selected at random.
+
+Each comparison uses the **latest strategy snapshot** of every other team, so opponents reflect how that team played at the equivalent point in their own run.
