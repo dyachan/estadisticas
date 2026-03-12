@@ -186,9 +186,9 @@ class RoguelikeController extends Controller
         $noOpponentAtLevel = false;
         $opponentStrategy  = null;
 
-        // Step 1: same matches_played (set PJ)
+        // Step 1: same matches_played or one below (set PJ)
         $setPJ = Strategy::whereIn('id', $latestStrategyIds)
-            ->where('matches_played', $team->matches_played)
+            ->whereIn('matches_played', [$team->matches_played, $team->matches_played - 1])
             ->get();
 
         if ($setPJ->isEmpty()) {
@@ -280,7 +280,7 @@ class RoguelikeController extends Controller
         $team->save();
 
         // 8. Pioneer check: is this team now at a matches_played level no other team has reached?
-        $isPioneer = !Strategy::whereIn('id', $latestStrategyIds)
+        $isPioneer = !GameTeam::where('id', '!=', $team->id)
             ->where('matches_played', $team->matches_played)
             ->exists();
 
