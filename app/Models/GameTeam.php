@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class GameTeam extends Model
@@ -29,6 +30,11 @@ class GameTeam extends Model
                     ->wherePivotNull('left_at')
                     ->withPivot('position_index', 'joined_at')
                     ->orderByPivot('position_index');
+    }
+
+    public function ui(): HasOne
+    {
+        return $this->hasOne(GameTeamUi::class);
     }
 
     public function strategies(): HasMany

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\GamePlayer;
 use App\Models\GameTeam;
 use App\Models\GameTeamPlayer;
+use App\Models\GameTeamUi;
 use App\Models\Strategy;
 use App\Models\StoryMatch;
 use Illuminate\Http\Request;
@@ -26,15 +27,22 @@ class RoguelikeController extends Controller
             'name'           => 'nullable|string|max:255',
             'player_names'   => 'nullable|array|size:3',
             'player_names.*' => 'nullable|string|max:255',
+            'color'          => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
 
+        $color   = $validated['color'] ?? '#fd9946';
         $team    = null;
         $players = [];
 
-        DB::transaction(function () use ($validated, &$team, &$players) {
+        DB::transaction(function () use ($validated, $color, &$team, &$players) {
             $team = GameTeam::create([
                 'user_id' => $validated['user_id'] ?? null,
                 'name'    => $validated['name'] ?? ('rogue_' . time()),
+            ]);
+
+            GameTeamUi::create([
+                'game_team_id' => $team->id,
+                'color'        => $color,
             ]);
 
             $defaults = array_fill_keys(GamePlayer::UPGRADEABLE_ATTRIBUTES, 0.1);
@@ -247,6 +255,7 @@ class RoguelikeController extends Controller
         $opponentName       = $opponentTeam->name;
         $opponentTeamId     = $opponentTeam->id;
         $opponentStrategyId = $opponentStrategy->id;
+        $opponentColor      = $opponentTeam->ui?->color ?? '#b676ff';
 
         // 5. Run simulation
         $simResult    = SimulationController::runSimulation(
@@ -300,7 +309,7 @@ class RoguelikeController extends Controller
             'match'         => $simResult['match'],
             'summary'       => $summary,
             'opponent'      => array_merge(
-                ['name' => $opponentName, 'players' => $opponentPlayers],
+                ['name' => $opponentName, 'color' => $opponentColor, 'players' => $opponentPlayers],
                 $opponentCounters ?? []
             ),
             'team'          => [
