@@ -1,0 +1,3242 @@
+{
+    "teams": [
+        {
+            "id": 1,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0,
+            "created_at": "2026-03-12T03:46:52.000000Z",
+            "updated_at": "2026-03-12T03:46:52.000000Z",
+            "ui": null,
+            "active_players": [
+                {
+                    "id": 1,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:46:52.000000Z",
+                    "updated_at": "2026-03-12T03:46:52.000000Z",
+                    "pivot": {
+                        "game_team_id": 1,
+                        "game_player_id": 1,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 03:46:52"
+                    }
+                },
+                {
+                    "id": 2,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:46:52.000000Z",
+                    "updated_at": "2026-03-12T03:46:52.000000Z",
+                    "pivot": {
+                        "game_team_id": 1,
+                        "game_player_id": 2,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 03:46:52"
+                    }
+                },
+                {
+                    "id": 3,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:46:52.000000Z",
+                    "updated_at": "2026-03-12T03:46:52.000000Z",
+                    "pivot": {
+                        "game_team_id": 1,
+                        "game_player_id": 3,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 03:46:52"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 0,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 1,
+            "created_at": "2026-03-12T03:47:12.000000Z",
+            "updated_at": "2026-03-12T03:47:13.000000Z",
+            "ui": null,
+            "active_players": [
+                {
+                    "id": 4,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:47:12.000000Z",
+                    "updated_at": "2026-03-12T03:47:12.000000Z",
+                    "pivot": {
+                        "game_team_id": 2,
+                        "game_player_id": 4,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 03:47:12"
+                    }
+                },
+                {
+                    "id": 5,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:47:12.000000Z",
+                    "updated_at": "2026-03-12T03:47:12.000000Z",
+                    "pivot": {
+                        "game_team_id": 2,
+                        "game_player_id": 5,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 03:47:12"
+                    }
+                },
+                {
+                    "id": 6,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:47:12.000000Z",
+                    "updated_at": "2026-03-12T03:47:12.000000Z",
+                    "pivot": {
+                        "game_team_id": 2,
+                        "game_player_id": 6,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 03:47:12"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 1,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 2,
+            "created_at": "2026-03-12T03:48:01.000000Z",
+            "updated_at": "2026-03-12T03:50:35.000000Z",
+            "ui": null,
+            "active_players": [
+                {
+                    "id": 7,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:48:01.000000Z",
+                    "updated_at": "2026-03-12T03:50:35.000000Z",
+                    "pivot": {
+                        "game_team_id": 3,
+                        "game_player_id": 7,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 03:48:01"
+                    }
+                },
+                {
+                    "id": 8,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:48:01.000000Z",
+                    "updated_at": "2026-03-12T03:50:35.000000Z",
+                    "pivot": {
+                        "game_team_id": 3,
+                        "game_player_id": 8,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 03:48:01"
+                    }
+                },
+                {
+                    "id": 9,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:48:01.000000Z",
+                    "updated_at": "2026-03-12T03:50:35.000000Z",
+                    "pivot": {
+                        "game_team_id": 3,
+                        "game_player_id": 9,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 03:48:01"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 1,
+            "draws": 2,
+            "losses": 0,
+            "matches_played": 3,
+            "created_at": "2026-03-12T03:53:08.000000Z",
+            "updated_at": "2026-03-12T03:54:55.000000Z",
+            "ui": null,
+            "active_players": [
+                {
+                    "id": 10,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:53:08.000000Z",
+                    "updated_at": "2026-03-12T03:54:55.000000Z",
+                    "pivot": {
+                        "game_team_id": 4,
+                        "game_player_id": 10,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 03:53:08"
+                    }
+                },
+                {
+                    "id": 11,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:53:08.000000Z",
+                    "updated_at": "2026-03-12T03:54:55.000000Z",
+                    "pivot": {
+                        "game_team_id": 4,
+                        "game_player_id": 11,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 03:53:08"
+                    }
+                },
+                {
+                    "id": 12,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:53:08.000000Z",
+                    "updated_at": "2026-03-12T03:54:55.000000Z",
+                    "pivot": {
+                        "game_team_id": 4,
+                        "game_player_id": 12,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 03:53:08"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 1,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 1,
+            "created_at": "2026-03-12T03:56:07.000000Z",
+            "updated_at": "2026-03-12T03:56:08.000000Z",
+            "ui": null,
+            "active_players": [
+                {
+                    "id": 13,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:56:07.000000Z",
+                    "updated_at": "2026-03-12T03:56:07.000000Z",
+                    "pivot": {
+                        "game_team_id": 5,
+                        "game_player_id": 13,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 03:56:07"
+                    }
+                },
+                {
+                    "id": 14,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:56:07.000000Z",
+                    "updated_at": "2026-03-12T03:56:07.000000Z",
+                    "pivot": {
+                        "game_team_id": 5,
+                        "game_player_id": 14,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 03:56:07"
+                    }
+                },
+                {
+                    "id": 15,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T03:56:07.000000Z",
+                    "updated_at": "2026-03-12T03:56:07.000000Z",
+                    "pivot": {
+                        "game_team_id": 5,
+                        "game_player_id": 15,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 03:56:07"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 0,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 1,
+            "created_at": "2026-03-12T04:09:51.000000Z",
+            "updated_at": "2026-03-12T04:09:52.000000Z",
+            "ui": {
+                "id": 1,
+                "game_team_id": 6,
+                "color": "#5b60f5",
+                "created_at": "2026-03-12T04:09:51.000000Z",
+                "updated_at": "2026-03-12T04:09:51.000000Z"
+            },
+            "active_players": [
+                {
+                    "id": 16,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T04:09:51.000000Z",
+                    "updated_at": "2026-03-12T04:09:51.000000Z",
+                    "pivot": {
+                        "game_team_id": 6,
+                        "game_player_id": 16,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 04:09:51"
+                    }
+                },
+                {
+                    "id": 17,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T04:09:51.000000Z",
+                    "updated_at": "2026-03-12T04:09:51.000000Z",
+                    "pivot": {
+                        "game_team_id": 6,
+                        "game_player_id": 17,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 04:09:51"
+                    }
+                },
+                {
+                    "id": 18,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T04:09:51.000000Z",
+                    "updated_at": "2026-03-12T04:09:51.000000Z",
+                    "pivot": {
+                        "game_team_id": 6,
+                        "game_player_id": 18,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 04:09:51"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 0,
+            "draws": 2,
+            "losses": 2,
+            "matches_played": 4,
+            "created_at": "2026-03-12T04:42:23.000000Z",
+            "updated_at": "2026-03-12T04:51:39.000000Z",
+            "ui": {
+                "id": 2,
+                "game_team_id": 7,
+                "color": "#4469fd",
+                "created_at": "2026-03-12T04:42:23.000000Z",
+                "updated_at": "2026-03-12T04:42:23.000000Z"
+            },
+            "active_players": [
+                {
+                    "id": 19,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T04:42:23.000000Z",
+                    "updated_at": "2026-03-12T04:54:14.000000Z",
+                    "pivot": {
+                        "game_team_id": 7,
+                        "game_player_id": 19,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 04:42:23"
+                    }
+                },
+                {
+                    "id": 20,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T04:42:23.000000Z",
+                    "updated_at": "2026-03-12T04:54:14.000000Z",
+                    "pivot": {
+                        "game_team_id": 7,
+                        "game_player_id": 20,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 04:42:23"
+                    }
+                },
+                {
+                    "id": 21,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T04:42:23.000000Z",
+                    "updated_at": "2026-03-12T04:54:14.000000Z",
+                    "pivot": {
+                        "game_team_id": 7,
+                        "game_player_id": 21,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 04:42:23"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 1,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 1,
+            "created_at": "2026-03-12T05:24:38.000000Z",
+            "updated_at": "2026-03-12T05:24:38.000000Z",
+            "ui": {
+                "id": 3,
+                "game_team_id": 8,
+                "color": "#8d9429",
+                "created_at": "2026-03-12T05:24:38.000000Z",
+                "updated_at": "2026-03-12T05:24:38.000000Z"
+            },
+            "active_players": [
+                {
+                    "id": 22,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:24:38.000000Z",
+                    "updated_at": "2026-03-12T05:24:38.000000Z",
+                    "pivot": {
+                        "game_team_id": 8,
+                        "game_player_id": 22,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 05:24:38"
+                    }
+                },
+                {
+                    "id": 23,
+                    "name": "Defender",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:24:38.000000Z",
+                    "updated_at": "2026-03-12T05:24:38.000000Z",
+                    "pivot": {
+                        "game_team_id": 8,
+                        "game_player_id": 23,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 05:24:38"
+                    }
+                },
+                {
+                    "id": 24,
+                    "name": "Striker",
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:24:38.000000Z",
+                    "updated_at": "2026-03-12T05:24:38.000000Z",
+                    "pivot": {
+                        "game_team_id": 8,
+                        "game_player_id": 24,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 05:24:38"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 1,
+            "draws": 2,
+            "losses": 2,
+            "matches_played": 5,
+            "created_at": "2026-03-12T05:26:21.000000Z",
+            "updated_at": "2026-03-12T05:37:42.000000Z",
+            "ui": {
+                "id": 4,
+                "game_team_id": 9,
+                "color": "#44cffd",
+                "created_at": "2026-03-12T05:26:21.000000Z",
+                "updated_at": "2026-03-12T05:26:21.000000Z"
+            },
+            "active_players": [
+                {
+                    "id": 25,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:26:21.000000Z",
+                    "updated_at": "2026-03-12T05:37:42.000000Z",
+                    "pivot": {
+                        "game_team_id": 9,
+                        "game_player_id": 25,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 05:26:21"
+                    }
+                },
+                {
+                    "id": 26,
+                    "name": "Defender",
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:26:21.000000Z",
+                    "updated_at": "2026-03-12T05:37:42.000000Z",
+                    "pivot": {
+                        "game_team_id": 9,
+                        "game_player_id": 26,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 05:26:21"
+                    }
+                },
+                {
+                    "id": 27,
+                    "name": "Striker",
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:26:21.000000Z",
+                    "updated_at": "2026-03-12T05:37:42.000000Z",
+                    "pivot": {
+                        "game_team_id": 9,
+                        "game_player_id": 27,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 05:26:21"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "user_id": null,
+            "name": "Team A",
+            "wins": 3,
+            "draws": 2,
+            "losses": 1,
+            "matches_played": 6,
+            "created_at": "2026-03-12T05:44:01.000000Z",
+            "updated_at": "2026-03-12T05:56:45.000000Z",
+            "ui": {
+                "id": 5,
+                "game_team_id": 10,
+                "color": "#44cffd",
+                "created_at": "2026-03-12T05:44:01.000000Z",
+                "updated_at": "2026-03-12T05:44:01.000000Z"
+            },
+            "active_players": [
+                {
+                    "id": 28,
+                    "name": "Goalkeeper",
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.6,
+                    "created_at": "2026-03-12T05:44:01.000000Z",
+                    "updated_at": "2026-03-12T05:56:44.000000Z",
+                    "pivot": {
+                        "game_team_id": 10,
+                        "game_player_id": 28,
+                        "position_index": 0,
+                        "joined_at": "2026-03-12 05:44:01"
+                    }
+                },
+                {
+                    "id": 29,
+                    "name": "Defender",
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.6,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:44:01.000000Z",
+                    "updated_at": "2026-03-12T05:56:45.000000Z",
+                    "pivot": {
+                        "game_team_id": 10,
+                        "game_player_id": 29,
+                        "position_index": 1,
+                        "joined_at": "2026-03-12 05:44:01"
+                    }
+                },
+                {
+                    "id": 30,
+                    "name": "Striker",
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.6,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1,
+                    "created_at": "2026-03-12T05:44:01.000000Z",
+                    "updated_at": "2026-03-12T05:56:45.000000Z",
+                    "pivot": {
+                        "game_team_id": 10,
+                        "game_player_id": 30,
+                        "position_index": 2,
+                        "joined_at": "2026-03-12 05:44:01"
+                    }
+                }
+            ]
+        }
+    ],
+    "strategies": [
+        {
+            "id": 1,
+            "game_team_id": 1,
+            "formation": [
+                {
+                    "game_player_id": 1,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 2,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 3,
+                    "name": "Striker",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:46:53.000000Z",
+            "updated_at": "2026-03-12T03:46:53.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 2,
+            "game_team_id": 2,
+            "formation": [
+                {
+                    "game_player_id": 4,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 5,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 6,
+                    "name": "Striker",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:47:12.000000Z",
+            "updated_at": "2026-03-12T03:47:12.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 3,
+            "game_team_id": 3,
+            "formation": [
+                {
+                    "game_player_id": 7,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 8,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 9,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:48:01.000000Z",
+            "updated_at": "2026-03-12T03:48:01.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 4,
+            "game_team_id": 3,
+            "formation": [
+                {
+                    "game_player_id": 7,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 8,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 9,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:50:35.000000Z",
+            "updated_at": "2026-03-12T03:50:35.000000Z",
+            "wins": 0,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 1
+        },
+        {
+            "id": 5,
+            "game_team_id": 4,
+            "formation": [
+                {
+                    "game_player_id": 10,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 11,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 12,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:53:08.000000Z",
+            "updated_at": "2026-03-12T03:53:08.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 6,
+            "game_team_id": 4,
+            "formation": [
+                {
+                    "game_player_id": 10,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 11,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 12,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:53:54.000000Z",
+            "updated_at": "2026-03-12T03:53:54.000000Z",
+            "wins": 0,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 1
+        },
+        {
+            "id": 7,
+            "game_team_id": 4,
+            "formation": [
+                {
+                    "game_player_id": 10,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 11,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 12,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:54:55.000000Z",
+            "updated_at": "2026-03-12T03:54:55.000000Z",
+            "wins": 0,
+            "draws": 2,
+            "losses": 0,
+            "matches_played": 2
+        },
+        {
+            "id": 8,
+            "game_team_id": 5,
+            "formation": [
+                {
+                    "game_player_id": 13,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 14,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 15,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T03:56:08.000000Z",
+            "updated_at": "2026-03-12T03:56:08.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 9,
+            "game_team_id": 6,
+            "formation": [
+                {
+                    "game_player_id": 16,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 17,
+                    "name": "Defender",
+                    "default_zone_x": 35,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 18,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [],
+                    "rules_without_ball": [],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T04:09:51.000000Z",
+            "updated_at": "2026-03-12T04:09:51.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 10,
+            "game_team_id": 7,
+            "formation": [
+                {
+                    "game_player_id": 19,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 20,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 53,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 21,
+                    "name": "Striker",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T04:42:23.000000Z",
+            "updated_at": "2026-03-12T04:42:23.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 11,
+            "game_team_id": 7,
+            "formation": [
+                {
+                    "game_player_id": 19,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 20,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 53,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 21,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T04:44:48.000000Z",
+            "updated_at": "2026-03-12T04:44:48.000000Z",
+            "wins": 0,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 1
+        },
+        {
+            "id": 12,
+            "game_team_id": 7,
+            "formation": [
+                {
+                    "game_player_id": 19,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 20,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 53,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 21,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T04:49:33.000000Z",
+            "updated_at": "2026-03-12T04:49:33.000000Z",
+            "wins": 0,
+            "draws": 2,
+            "losses": 0,
+            "matches_played": 2
+        },
+        {
+            "id": 13,
+            "game_team_id": 7,
+            "formation": [
+                {
+                    "game_player_id": 19,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 20,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 53,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 21,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T04:51:39.000000Z",
+            "updated_at": "2026-03-12T04:51:39.000000Z",
+            "wins": 0,
+            "draws": 2,
+            "losses": 1,
+            "matches_played": 3
+        },
+        {
+            "id": 14,
+            "game_team_id": 7,
+            "formation": [
+                {
+                    "game_player_id": 19,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 20,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 21,
+                    "name": "Striker",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T04:54:14.000000Z",
+            "updated_at": "2026-03-12T04:54:14.000000Z",
+            "wins": 0,
+            "draws": 2,
+            "losses": 2,
+            "matches_played": 4
+        },
+        {
+            "id": 15,
+            "game_team_id": 8,
+            "formation": [
+                {
+                    "game_player_id": 22,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 23,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 42,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 24,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:24:38.000000Z",
+            "updated_at": "2026-03-12T05:24:38.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 16,
+            "game_team_id": 9,
+            "formation": [
+                {
+                    "game_player_id": 25,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 26,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 51,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 27,
+                    "name": "Striker",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:26:21.000000Z",
+            "updated_at": "2026-03-12T05:26:21.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 17,
+            "game_team_id": 9,
+            "formation": [
+                {
+                    "game_player_id": 25,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 26,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 51,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 27,
+                    "name": "Striker",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:27:31.000000Z",
+            "updated_at": "2026-03-12T05:27:31.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 1,
+            "matches_played": 1
+        },
+        {
+            "id": 18,
+            "game_team_id": 9,
+            "formation": [
+                {
+                    "game_player_id": 25,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 26,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 51,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 27,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:29:13.000000Z",
+            "updated_at": "2026-03-12T05:29:13.000000Z",
+            "wins": 0,
+            "draws": 1,
+            "losses": 1,
+            "matches_played": 2
+        },
+        {
+            "id": 19,
+            "game_team_id": 9,
+            "formation": [
+                {
+                    "game_player_id": 25,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 26,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 27,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 7,
+                            "action": 9
+                        },
+                        {
+                            "condition": 1,
+                            "action": 5
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:33:48.000000Z",
+            "updated_at": "2026-03-12T05:33:48.000000Z",
+            "wins": 0,
+            "draws": 2,
+            "losses": 1,
+            "matches_played": 3
+        },
+        {
+            "id": 20,
+            "game_team_id": 9,
+            "formation": [
+                {
+                    "game_player_id": 25,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 26,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 27,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 7,
+                            "action": 9
+                        },
+                        {
+                            "condition": 1,
+                            "action": 5
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:37:42.000000Z",
+            "updated_at": "2026-03-12T05:37:42.000000Z",
+            "wins": 0,
+            "draws": 2,
+            "losses": 2,
+            "matches_played": 4
+        },
+        {
+            "id": 21,
+            "game_team_id": 10,
+            "formation": [
+                {
+                    "game_player_id": 28,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 29,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 45,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 30,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:44:01.000000Z",
+            "updated_at": "2026-03-12T05:44:01.000000Z",
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 0
+        },
+        {
+            "id": 22,
+            "game_team_id": 10,
+            "formation": [
+                {
+                    "game_player_id": 28,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 29,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 45,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 30,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.1,
+                    "reaction": 0.1,
+                    "dribble": 0.6,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:44:39.000000Z",
+            "updated_at": "2026-03-12T05:44:39.000000Z",
+            "wins": 1,
+            "draws": 0,
+            "losses": 0,
+            "matches_played": 1
+        },
+        {
+            "id": 23,
+            "game_team_id": 10,
+            "formation": [
+                {
+                    "game_player_id": 28,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 29,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 45,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 30,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 9
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.1,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.6,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:47:19.000000Z",
+            "updated_at": "2026-03-12T05:47:19.000000Z",
+            "wins": 1,
+            "draws": 1,
+            "losses": 0,
+            "matches_played": 2
+        },
+        {
+            "id": 24,
+            "game_team_id": 10,
+            "formation": [
+                {
+                    "game_player_id": 28,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 4,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.6
+                },
+                {
+                    "game_player_id": 29,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.6,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 30,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 7,
+                            "action": 9
+                        },
+                        {
+                            "condition": 1,
+                            "action": 5
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.1,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.6,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:50:36.000000Z",
+            "updated_at": "2026-03-12T05:50:36.000000Z",
+            "wins": 1,
+            "draws": 2,
+            "losses": 0,
+            "matches_played": 3
+        },
+        {
+            "id": 25,
+            "game_team_id": 10,
+            "formation": [
+                {
+                    "game_player_id": 28,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 4,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.6
+                },
+                {
+                    "game_player_id": 29,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.6,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 30,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 7,
+                            "action": 9
+                        },
+                        {
+                            "condition": 1,
+                            "action": 5
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.6,
+                    "strength": 0.1,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:53:53.000000Z",
+            "updated_at": "2026-03-12T05:53:53.000000Z",
+            "wins": 1,
+            "draws": 2,
+            "losses": 1,
+            "matches_played": 4
+        },
+        {
+            "id": 26,
+            "game_team_id": 10,
+            "formation": [
+                {
+                    "game_player_id": 28,
+                    "name": "Goalkeeper",
+                    "default_zone_x": 50,
+                    "default_zone_y": 20,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 4,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.1,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.1,
+                    "strength": 0.6,
+                    "endurance": 0.1,
+                    "scan_with_ball": 0.6,
+                    "scan_without_ball": 0.6
+                },
+                {
+                    "game_player_id": 29,
+                    "name": "Defender",
+                    "default_zone_x": 50,
+                    "default_zone_y": 50,
+                    "rules_with_ball": [
+                        {
+                            "condition": 1,
+                            "action": 8
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 5,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 3
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.6,
+                    "dribble": 0.1,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                },
+                {
+                    "game_player_id": 30,
+                    "name": "Striker",
+                    "default_zone_x": 65,
+                    "default_zone_y": 80,
+                    "rules_with_ball": [
+                        {
+                            "condition": 7,
+                            "action": 9
+                        },
+                        {
+                            "condition": 1,
+                            "action": 5
+                        }
+                    ],
+                    "rules_without_ball": [
+                        {
+                            "condition": 6,
+                            "action": 2
+                        },
+                        {
+                            "condition": 3,
+                            "action": 10
+                        }
+                    ],
+                    "max_speed": 0.6,
+                    "accuracy": 0.6,
+                    "control": 0.6,
+                    "reaction": 0.1,
+                    "dribble": 0.6,
+                    "strength": 0.1,
+                    "endurance": 0.6,
+                    "scan_with_ball": 0.1,
+                    "scan_without_ball": 0.1
+                }
+            ],
+            "created_at": "2026-03-12T05:56:45.000000Z",
+            "updated_at": "2026-03-12T05:56:45.000000Z",
+            "wins": 2,
+            "draws": 2,
+            "losses": 1,
+            "matches_played": 5
+        }
+    ]
+}

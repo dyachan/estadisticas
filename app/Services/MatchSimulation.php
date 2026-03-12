@@ -164,13 +164,13 @@ class MatchSimulation
                     $tickGoal = "Team B";
 
                     if(!$this->lastPlayerWithBall){
-                        $this->log("Team B get a goal");
+                        $this->log(['key' => 'log_goal', 'team' => 'B']);
                     } else {
                         if($this->lastPlayerWithBall->team == "Team B"){
-                            $this->log("Team B {$this->lastPlayerWithBall->name} do a goal");
+                            $this->log(['key' => 'log_goal_player', 'team' => 'B', 'player' => $this->lastPlayerWithBall->name]);
                             $this->lastPlayerWithBall->summary->goals++;
                         } else {
-                            $this->log("Team B get an autogoal from {$this->lastPlayerWithBall->name}");
+                            $this->log(['key' => 'log_autogoal', 'team' => 'B', 'player' => $this->lastPlayerWithBall->name]);
                         }
                     }
                 } else {
@@ -178,18 +178,18 @@ class MatchSimulation
                     $tickGoal = "Team A";
 
                     if(!$this->lastPlayerWithBall){
-                        $this->log("Team A get a goal");
+                        $this->log(['key' => 'log_goal', 'team' => 'A']);
                     } else {
                         if($this->lastPlayerWithBall->team == "Team A"){
-                            $this->log("Team A {$this->lastPlayerWithBall->name} do a goal");
+                            $this->log(['key' => 'log_goal_player', 'team' => 'A', 'player' => $this->lastPlayerWithBall->name]);
                             $this->lastPlayerWithBall->summary->goals++;
                         } else {
-                            $this->log("Team A get an autogoal from {$this->lastPlayerWithBall->name}");
+                            $this->log(['key' => 'log_autogoal', 'team' => 'A', 'player' => $this->lastPlayerWithBall->name]);
                         }
                     }
                 }
             } else {
-                $this->log("reset ball");
+                $this->log(['key' => 'log_reset_ball']);
             }
             $this->resetBall();
         }
@@ -296,10 +296,10 @@ class MatchSimulation
             $dx = $targetX - $this->ball->x;
             $dy = $targetY - $this->ball->y;
             $dist = sqrt($dx * $dx + $dy * $dy);
-            $force = (2 + min($dist * 0.01, 4)) * (0.5 + 0.5 * $player->currentStrength);
+            $force = (3 + min($dist * 0.01, 3)) * (0.6 + 0.4 * $player->currentStrength);
             $this->ball->applyForce(['x' => $targetX, 'y' => $targetY], $force);
             $player->ballCooldown = self::BALLCOOLDOWN_PASS;
-            $this->log("{$player->team} {$player->name} pass {$target->name}");
+            $this->log(['key' => 'log_pass', 'team' => str_replace('Team ', '', $player->team), 'player' => $player->name, 'target' => $target->name]);
         } else { // SHOOT
             $target = [
                 "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE) + (rand(-1000, 1000) / 1000) * $dev,
@@ -308,7 +308,7 @@ class MatchSimulation
             $force = 10 * (0.5 + 0.5 * $player->currentStrength);
             $this->ball->applyForce($target, $force);
             $player->ballCooldown = self::BALLCOOLDOWN_SHOOT;
-            $this->log("{$player->team} {$player->name} shoot to goal");
+            $this->log(['key' => 'log_shoot', 'team' => str_replace('Team ', '', $player->team), 'player' => $player->name]);
         }
 
         $this->currentPlayerWithBall = null;
@@ -371,7 +371,7 @@ class MatchSimulation
                 $this->ball->vy = sin($angle) * $reb;
 
                 $newOwner->ballCooldown = self::BALLCOOLDOWN_FAILED_CONTROL;
-                $this->log("{$newOwner->team} {$newOwner->name} intercept ball");
+                $this->log(['key' => 'log_intercept', 'team' => str_replace('Team ', '', $newOwner->team), 'player' => $newOwner->name]);
                 if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team != $newOwner->team){
                     $this->lastPlayerWithBall = null;
                 }
@@ -385,7 +385,7 @@ class MatchSimulation
                 $this->ball->vx = 0;
                 $this->ball->vy = 0;
 
-                $this->log("{$newOwner->team} {$newOwner->name} control ball");
+                $this->log(['key' => 'log_control', 'team' => str_replace('Team ', '', $newOwner->team), 'player' => $newOwner->name]);
 
                 if($this->lastPlayerWithBall && $this->lastPlayerWithBall->team == $newOwner->team){
                     $this->lastPlayerWithBall->summary->passesAchieved++;
@@ -407,7 +407,7 @@ class MatchSimulation
                 "y" => $this->ball->y + (rand(-100,100))
             ], self::BALL_DISPUTED_FORCE);
 
-            $this->log("ball bounces away");
+            $this->log(['key' => 'log_bounce']);
         }
     }
 
@@ -438,7 +438,7 @@ class MatchSimulation
                 $this->ball->vx = 0;
                 $this->ball->vy = 0;
 
-                $this->log("{$op->team} {$op->name} steal to {$this->currentPlayerWithBall->name}");
+                $this->log(['key' => 'log_steal', 'team' => str_replace('Team ', '', $op->team), 'player' => $op->name, 'target' => $this->currentPlayerWithBall->name]);
 
                 $this->currentPlayerWithBall = $op;
                 $this->lastPlayerWithBall = null;
@@ -453,7 +453,7 @@ class MatchSimulation
                 $this->currentPlayerWithBall->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
                 $op->ballCooldown = self::BALLCOOLDOWN_TAKE_OFF;
 
-                $this->log("{$op->team} {$op->name} take off to {$this->currentPlayerWithBall->name}");
+                $this->log(['key' => 'log_takeoff', 'team' => str_replace('Team ', '', $op->team), 'player' => $op->name, 'target' => $this->currentPlayerWithBall->name]);
 
                 $this->applyForceToBall([
                     "x" => $this->ball->x + rand(-100,100)*2,
@@ -469,7 +469,7 @@ class MatchSimulation
 
                 $op->ballCooldown = self::BALLCOOLDOWN_FAIL_DEFENDING;
                 $op->bodyCooldown = self::BODYCOOLDOWN_BALL_STEAL;
-                $this->log("{$this->currentPlayerWithBall->team} {$this->currentPlayerWithBall->name} dribble {$op->name}");
+                $this->log(['key' => 'log_dribble', 'team' => str_replace('Team ', '', $this->currentPlayerWithBall->team), 'player' => $this->currentPlayerWithBall->name, 'target' => $op->name]);
             }
         }
     }

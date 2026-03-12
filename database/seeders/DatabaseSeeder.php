@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(FormationsSeeder::class);
+        $this->call(RoguelikeSeeder::class);
     }
 }
