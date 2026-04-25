@@ -456,7 +456,7 @@ class Player
                 break;
 
             default:
-                $this->setTarget(['x' => $this->baseX, 'y' => $this->baseY], $this->memory);
+                $this->target = ['x' => $this->baseX, 'y' => $this->baseY];
                 break;
         }
 
