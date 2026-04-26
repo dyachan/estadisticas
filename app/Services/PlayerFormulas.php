@@ -97,25 +97,34 @@ class PlayerFormulas
     }
 
     // -------------------------------------------------------------------------
-    // STRENGTH  (resource depletion rate when running)
+    // STRENGTH  (max force on passes and shots; fixed energy depletion rate)
     // -------------------------------------------------------------------------
-    const STRENGTH_DEPLETION_MIN = 0.0001;  // currentStrength lost per unit moved at value=1 (slow depletion)
-    const STRENGTH_DEPLETION_MAX = 0.001;   // currentStrength lost per unit moved at value=0 (fast depletion)
+    const STAMINA_DEPLETION_MIN = 0.0001;  // stamina lost per unit moved at value=1 (slow depletion)
+    const STAMINA_DEPLETION_MAX = 0.001;   // stamina lost per unit moved at value=0 (fast depletion)
+    const STRENGTH_FORCE_MIN = 0.7;        // force multiplier at strength=0
+    const STRENGTH_FORCE_MAX = 1.3;        // force multiplier at strength=1
 
-    /** Convert a strength attribute (0–1) to the currentStrength depletion rate per unit of distance moved. */
-    public static function strengthDepletionRate(float $value): float
+    /** Convert a strength attribute (0–1) to the stamina depletion rate per unit of distance moved. */
+    public static function staminaDepletionRate(float $value): float
     {
         $value = max(0.0, min(1.0, $value));
-        return self::STRENGTH_DEPLETION_MAX - (self::STRENGTH_DEPLETION_MAX - self::STRENGTH_DEPLETION_MIN) * $value;
+        return self::STAMINA_DEPLETION_MAX - (self::STAMINA_DEPLETION_MAX - self::STAMINA_DEPLETION_MIN) * $value;
+    }
+
+    /** Convert a strength attribute (0–1) to a pass/shoot force multiplier. */
+    public static function strengthForceFactor(float $value): float
+    {
+        $value = max(0.0, min(1.0, $value));
+        return self::STRENGTH_FORCE_MIN + (self::STRENGTH_FORCE_MAX - self::STRENGTH_FORCE_MIN) * $value;
     }
 
     // -------------------------------------------------------------------------
     // ENDURANCE  (strength recovery rate per tick)
     // -------------------------------------------------------------------------
-    const ENDURANCE_RECOVERY_MIN = 0.00005;  // currentStrength recovered per tick at value=0
-    const ENDURANCE_RECOVERY_MAX = 0.0005;   // currentStrength recovered per tick at value=1
+    const ENDURANCE_RECOVERY_MIN = 0.00005;  // stamina recovered per tick at value=0
+    const ENDURANCE_RECOVERY_MAX = 0.001;   // stamina recovered per tick at value=1
 
-    /** Convert an endurance attribute (0–1) to the currentStrength recovery rate per tick. */
+    /** Convert an endurance attribute (0–1) to the stamina recovery rate per tick. */
     public static function enduranceRecoveryRate(float $value): float
     {
         $value = max(0.0, min(1.0, $value));

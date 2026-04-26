@@ -17,6 +17,5 @@ class PlayerMemory
     public array $teammates = [];
     public array $opponents = [];
     public ?string $ballTeam = null;
-    public array $ballChasers = [];
     public int $tick = -1;
 }

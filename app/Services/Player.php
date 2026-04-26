@@ -14,9 +14,9 @@ use App\Services\PlayerFormulas;
  *
  * Player stats (0.0–1.0 normalized, passed via config):
  * - scanWithBall / scanWithoutBall : how often memory is refreshed
- * - strength    : depletion rate when running; affects effective max speed,
- *                 pass/shoot force, and resistance to ball loss in challenges
- * - endurance   : currentStrength recovery rate per tick
+ * - strength    : maximum force on passes and shots (0.7×–1.3× multiplier);
+ *                 energy depletion rate is now fixed for all players
+ * - endurance   : stamina recovery rate per tick
  * - maxSpeed    : base maximum movement speed
  * - accuracy    : pass and shot targeting precision (higher = less deviation)
  * - control     : ball speed threshold for successful ball control
@@ -48,12 +48,17 @@ class Player
     public float $controlSpeedThreshold;  // max ball speed at which this player can take possession
     public float $reactionFactor;         // defender steal factor (0–1)
     public float $dribbleFactor;          // attacker keep-ball factor (0–1)
-    public float $strengthDepletionRate;  // currentStrength lost per unit of distance moved
-    public float $enduranceRecoveryRate;  // currentStrength recovered per tick
+    public float $staminaDepletionRate;  // stamina lost per unit of distance moved (fixed for all)
+    public float $strengthForceFactor;   // pass/shoot force multiplier derived from strength stat (0.7–1.3)
+    public float $enduranceRecoveryRate;  // stamina recovered per tick
     // How many ticks to wait before refreshing memory depending on ball possession
     public int $memoryRefreshPeriodWithBall;
     public int $memoryRefreshPeriodWithoutBall;
-    public float $currentStrength = 1.0;          // runtime resource (0–1); depletes when running
+    public float $scanWithBall;
+    public float $scanWithoutBall;
+    public float $nearRadiusMin;
+    public float $nearRadiusMax;
+    public float $stamina = 1.0;          // runtime resource (0–1); depletes when running
 
     public array $currentSpeed = ['vx' => 0, 'vy' => 0];
     public ?array $target = null;
@@ -68,7 +73,7 @@ class Player
     public PlayerSummary $summary;
     public PlayerMemory $memory;
 
-    private const STRENGTH_SPEED_FLOOR = 0.4; // min speed fraction when fully exhausted
+    private const STAMINA_SPEED_FLOOR = 0.4; // min speed fraction when fully exhausted
 
     public function __construct(array $config)
     {
@@ -97,10 +102,15 @@ class Player
         $this->controlSpeedThreshold          = PlayerFormulas::controlSpeedThreshold($config['control'] ?? 0.5);
         $this->reactionFactor                 = PlayerFormulas::reactionFactor($config['reaction'] ?? 0.5);
         $this->dribbleFactor                  = PlayerFormulas::dribbleFactor($config['dribble'] ?? 0.5);
-        $this->strengthDepletionRate          = PlayerFormulas::strengthDepletionRate($config['strength'] ?? 0.5);
+        $this->staminaDepletionRate          = PlayerFormulas::staminaDepletionRate(0.5);
+        $this->strengthForceFactor            = PlayerFormulas::strengthForceFactor($config['strength'] ?? 0.5);
         $this->enduranceRecoveryRate          = PlayerFormulas::enduranceRecoveryRate($config['endurance'] ?? 0.5);
-        $this->memoryRefreshPeriodWithBall    = PlayerFormulas::scanPeriodWithBall($config['scanWithBall'] ?? 0.5);
-        $this->memoryRefreshPeriodWithoutBall = PlayerFormulas::scanPeriodWithoutBall($config['scanWithoutBall'] ?? 0.5);
+        $this->scanWithBall    = $config['scanWithBall'] ?? 0.5;
+        $this->scanWithoutBall = $config['scanWithoutBall'] ?? 0.5;
+        $this->nearRadiusMin   = $config['nearRadiusMin'] ?? $this->assistDistance;
+        $this->nearRadiusMax   = $config['nearRadiusMax'] ?? $this->assistDistance;
+        $this->memoryRefreshPeriodWithBall    = PlayerFormulas::scanPeriodWithBall($this->scanWithBall);
+        $this->memoryRefreshPeriodWithoutBall = PlayerFormulas::scanPeriodWithoutBall($this->scanWithoutBall);
     }
 
     /** Update cached memory from a fresh simState and record tick */
@@ -111,7 +121,6 @@ class Player
         $this->memory->teammates = array_map(fn($p) => (object)['x' => $p->x, 'y' => $p->y, 'name' => $p->name, 'marked' => $p->marked], $simState->teammates);
         $this->memory->opponents = array_map(fn($p) => (object)['x' => $p->x, 'y' => $p->y, 'name' => $p->name, 'marked' => $p->marked], $simState->opponents);
         $this->memory->ballTeam = $simState->ballTeam;
-        $this->memory->ballChasers = $simState->ballChasers;
         $this->memory->tick = $simState->tick;
     }
 
@@ -119,12 +128,15 @@ class Player
         return [
             'name' => $this->name,
             'x' => $this->x, 'y' => $this->y,
+            'targetX' => $this->target['x'] ?? null,
+            'targetY' => $this->target['y'] ?? null,
             'condition' => $this->currentCondition,
             'ballCooldown' => $this->ballCooldown,
             'bodyCooldown' => $this->bodyCooldown,
             'marked' => $this->marked,
-            'currentStrength' => $this->currentStrength,
+            'stamina' => $this->stamina,
             'hasBall' => $this->hasBall,
+            'lastScanTick' => $this->memory->tick,
         ];
     }
 
@@ -172,7 +184,7 @@ class Player
         }
 
         // Recover strength over time (endurance determines recovery speed)
-        $this->currentStrength = min(1.0, $this->currentStrength + $this->enduranceRecoveryRate * $dt);
+        $this->stamina = min(1.0, $this->stamina + $this->enduranceRecoveryRate * $dt);
 
         $this->moveToward($dt);
     }
@@ -222,8 +234,8 @@ class Player
         $dirX = $dx / $dist;
         $dirY = $dy / $dist;
 
-        // Strength reduces effective max speed (STRENGTH_SPEED_FLOOR when fully exhausted)
-        $effectiveMaxSpeed = $this->maxSpeed * (self::STRENGTH_SPEED_FLOOR + (1.0 - self::STRENGTH_SPEED_FLOOR) * $this->currentStrength);
+        // Strength reduces effective max speed (STAMINA_SPEED_FLOOR when fully exhausted)
+        $effectiveMaxSpeed = $this->maxSpeed * (self::STAMINA_SPEED_FLOOR + (1.0 - self::STAMINA_SPEED_FLOOR) * $this->stamina);
 
         // ----- X axis -----
         $desiredVx = $dirX * $effectiveMaxSpeed;
@@ -261,7 +273,7 @@ class Player
         if ($this->hasBall) {
             $this->summary->distanceTraveledWithBall += $movedDist;
         }
-        $this->currentStrength = max(0.0, $this->currentStrength - $this->strengthDepletionRate * $movedDist);
+        $this->stamina = max(0.0, $this->stamina - $this->staminaDepletionRate * $movedDist);
 
         $this->x += $moveX;
         $this->y += $moveY;
@@ -297,9 +309,6 @@ class Player
     /** Evaluate rules */
     public function decide(PlayerMemory $simState)
     {
-        // ballChasers are used for assist behavior, so we update them every tick to ensure good responsiveness
-        $this->memory->ballChasers = $simState->ballChasers;
-
         $period = $this->hasBall ? $this->memoryRefreshPeriodWithBall : $this->memoryRefreshPeriodWithoutBall;
         $shouldRefresh = ($this->memory->tick < 0) || ($simState->tick - $this->memory->tick >= (0.5+rand(0, 10000) / 20000)*$period);
         if ($shouldRefresh) {
@@ -308,14 +317,17 @@ class Player
             // always update ball team
             $this->memory->ballTeam = $simState->ballTeam;
 
+            $scanFactor = $this->hasBall ? $this->scanWithBall : $this->scanWithoutBall;
+            $nearRadius = $this->nearRadiusMin + ($this->nearRadiusMax - $this->nearRadiusMin) * $scanFactor;
+
             // Use cached memory but update near ball and players
-            if($this->distanceTo($simState->ball) < $this->assistDistance){
+            if ($this->distanceTo($simState->ball) < $nearRadius) {
                 $this->memory->ball = $simState->ball;
             }
             // Update near teammates and opponents
             foreach ($this->memory->teammates as $cachedMate) {
                 $realMate = array_values(array_filter($simState->teammates, fn($p) => $p->name === $cachedMate->name))[0] ?? null;
-                if ($realMate && $this->distanceTo($realMate) < $this->assistDistance) {
+                if ($realMate && $this->distanceTo($realMate) < $nearRadius) {
                     $cachedMate->x = $realMate->x;
                     $cachedMate->y = $realMate->y;
                     $cachedMate->marked = $realMate->marked;
@@ -323,7 +335,7 @@ class Player
             }
             foreach ($this->memory->opponents as $cachedOpp) {
                 $realOpp = array_values(array_filter($simState->opponents, fn($p) => $p->name === $cachedOpp->name))[0] ?? null;
-                if ($realOpp && $this->distanceTo($realOpp) < $this->assistDistance) {
+                if ($realOpp && $this->distanceTo($realOpp) < $nearRadius) {
                     $cachedOpp->x = $realOpp->x;
                     $cachedOpp->y = $realOpp->y;
                     $cachedOpp->marked = $realOpp->marked;
@@ -358,7 +370,7 @@ class Player
         switch ($this->currentAction) {
 
             case PlayerRules::A_GO_TO_BALL: // "Go to the ball"
-                $this->setTarget(['x' => $ball->x, 'y' => $ball->y], $this->memory);
+                $this->setTarget(['x' => $ball->x, 'y' => $ball->y]);
                 break;
 
             case PlayerRules::A_GO_TO_NEAR_RIVAL: // "Go to near rival"
@@ -375,29 +387,29 @@ class Player
                     }
 
                     if ($closest) {
-                        $this->setTarget(['x' => $closest->x, 'y' => $closest->y], $this->memory);
+                        $this->setTarget(['x' => $closest->x, 'y' => $closest->y]);
                     }
                 }
                 break;
 
             case PlayerRules::A_GO_TO_MY_GOAL: // "Go to my goal"
                 $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
-                $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY], $this->memory);
+                $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY]);
                 break;
 
             case PlayerRules::A_GO_TO_RIVAL_GOAL: // "Go to rival goal"
                 $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
-                $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY], $this->memory);
+                $this->setTarget(['x' => $fieldWidth / 2, 'y' => $goalY]);
                 break;
 
             case PlayerRules::A_GO_FORWARD: // "Go forward"
                 $goalY = $this->currentFieldSide === "top" ? 10 : $fieldHeight - 10;
-                $this->setTarget(['x' => $this->x, 'y' => $goalY], $this->memory);
+                $this->setTarget(['x' => $this->x, 'y' => $goalY]);
                 break;
 
             case PlayerRules::A_GO_BACK: // "Go back"
                 $goalY = $this->currentFieldSide === "bottom" ? 10 : $fieldHeight - 10;
-                $this->setTarget(['x' => $this->x, 'y' => $goalY], $this->memory);
+                $this->setTarget(['x' => $this->x, 'y' => $goalY]);
                 break;
 
             case PlayerRules::A_PASS: // "Pass the ball"
@@ -443,14 +455,14 @@ class Player
                 $right = ['x' => $fieldWidth * (0.7+rand(1,20)/100), 'y' => $this->y];
 
                 if ($this->x >= $right['x']) {
-                    $this->setTarget($left, $this->memory);
+                    $this->setTarget($left);
                 } else if($this->x <= $left['x']) {
-                    $this->setTarget($right, $this->memory);
+                    $this->setTarget($right);
                 } else if($this->target == null){
                     if($this->x < $fieldWidth*0.5){
-                        $this->setTarget($right, $this->memory);
+                        $this->setTarget($right);
                     } else {
-                        $this->setTarget($left, $this->memory);
+                        $this->setTarget($left);
                     }
                 }
                 break;
@@ -548,36 +560,52 @@ class Player
         }
     }
 
-    public function setTarget($target, PlayerMemory $simState){
-        if(!$simState->ballChasers[$this->team] || $simState->ballChasers[$this->team] === $this){
+    public function setTarget($target): void
+    {
+        $chaser = $this->getPerceivedChaser();
+
+        if ($chaser === null) {
             $this->target = $target;
+            return;
+        }
+
+        $dx = $target['x'] - $chaser->x;
+        $dy = $target['y'] - $chaser->y;
+        $targetChaserDist = hypot($dx, $dy);
+
+        if ($targetChaserDist < $this->assistDistance) {
+            $vx = $this->x - $chaser->x;
+            $vy = $this->y - $chaser->y;
+            $len = hypot($vx, $vy);
+            if ($len === 0) { $vx = 1; $vy = 0; $len = 1; }
+            $vx /= $len;
+            $vy /= $len;
+            $this->target = [
+                'x' => min($this->fieldWidth, max(0, $chaser->x + $vx * $this->assistDistance)),
+                'y' => min($this->fieldHeight, max(0, $chaser->y + $vy * $this->assistDistance)),
+            ];
         } else {
-            $chasser = $simState->ballChasers[$this->team];
-            // target teammate distance
-            $dx = $target['x'] - $chasser->x;
-            $dy = $target['y'] - $chasser->y;
-            $targetTeammateDist = hypot($dx, $dy);
+            $this->target = $target;
+        }
+    }
 
-            if($targetTeammateDist < $this->assistDistance){ // assist player from distance
-                // chasser player vector
-                $vx = $this->x - $chasser->x;
-                $vy = $this->y - $chasser->y;
-                $len = hypot($vx, $vy);
-                if ($len === 0) {
-                    $vx = 1;
-                    $vy = 0;
-                    $len = 1;
-                }
+    private function getPerceivedChaser(): ?object
+    {
+        $ball = $this->memory->ball;
+        if ($ball === null) return null;
 
-                // Normalizar y escalar
-                $vx /= $len;
-                $vy /= $len;
+        $myDist = hypot($ball->x - $this->x, $ball->y - $this->y);
+        $closestMate = null;
+        $closestDist = $myDist;
 
-                $this->target = [
-                    'x' => min($this->fieldWidth, max(0, $chasser->x + $vx * $this->assistDistance)),
-                    'y' => min($this->fieldHeight, max(0, $chasser->y + $vy * $this->assistDistance))
-                ];
+        foreach ($this->memory->teammates as $mate) {
+            $mateDist = hypot($ball->x - $mate->x, $ball->y - $mate->y);
+            if ($mateDist < $closestDist) {
+                $closestDist = $mateDist;
+                $closestMate = $mate;
             }
         }
+
+        return $closestMate; // null = este jugador es el chaser percibido
     }
 }

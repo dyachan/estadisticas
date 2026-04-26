@@ -21,14 +21,16 @@ class MatchSimulation
     private const BODYCOOLDOWN_BALL_STEAL = 70;
     private const BODYOVERLAP_FACTOR = 0.6;
     private const BODYMARKED_FACTOR = 1.5;
-    private const BODYNEAR_FACTOR = 2;
-    private const BODYASSIST_FACTOR = 2;
+    private const BODYNEAR_FACTOR = 3;
+    private const BODYASSIST_FACTOR = 3;
 
     private const BALL_DISPUTED_FORCE = 3;
     private const BALL_TAKEOFF_FORCE = 4;
 
     private const PLAYER_SIZE = 38;
     private const GOAL_SIZE = 120;
+    private const SCAN_NEAR_RADIUS_MIN_OFFSET = 10;  // added to PLAYER_SIZE for min near-update radius (scan=0)
+    private const SCAN_NEAR_RADIUS_MAX = 150;         // near-update radius at full scan (scan=1)
 
     public const TICKS_PER_MATCH = 5000;
 
@@ -75,7 +77,9 @@ class MatchSimulation
             ["x" => $this->width * 0.7, "y" => $this->height * 0.40],
         ];
 
-        $assistDistance = self::PLAYER_SIZE * self::BODYASSIST_FACTOR;
+        $assistDistance  = self::PLAYER_SIZE * self::BODYASSIST_FACTOR;
+        $nearRadiusMin   = self::PLAYER_SIZE + self::SCAN_NEAR_RADIUS_MIN_OFFSET;
+        $nearRadiusMax   = self::SCAN_NEAR_RADIUS_MAX;
 
         // Team A
         foreach ($teamAData["players"] as $i => $p) {
@@ -92,6 +96,8 @@ class MatchSimulation
                 "fieldWidth" => $this->width,
                 "fieldHeight" => $this->height,
                 "assistDistance" => $assistDistance,
+                "nearRadiusMin" => $nearRadiusMin,
+                "nearRadiusMax" => $nearRadiusMax,
                 "scanWithBall" => $p["scanWithBall"] ?? 0.5,
                 "scanWithoutBall" => $p["scanWithoutBall"] ?? 0.5,
                 "maxSpeed" => $p["maxSpeed"] ?? null,
@@ -119,6 +125,8 @@ class MatchSimulation
                 "fieldWidth" => $this->width,
                 "fieldHeight" => $this->height,
                 "assistDistance" => $assistDistance,
+                "nearRadiusMin" => $nearRadiusMin,
+                "nearRadiusMax" => $nearRadiusMax,
                 "scanWithBall" => $p["scanWithBall"] ?? 0.5,
                 "scanWithoutBall" => $p["scanWithoutBall"] ?? 0.5,
                 "maxSpeed" => $p["maxSpeed"] ?? null,
@@ -212,7 +220,6 @@ class MatchSimulation
             $simState->teammates = array_values(array_filter($this->players, fn($p) => $p->team === $player->team && $p !== $player));
             $simState->opponents = array_values(array_filter($this->players, fn($p) => $p->team !== $player->team && $p->bodyCooldown <= 0));
             $simState->ballTeam = $this->currentPlayerWithBall?->team ?? null;
-            $simState->ballChasers = $this->selectBallChasers();
 
             $player->checkMarked($simState->opponents, self::PLAYER_SIZE * self::BODYMARKED_FACTOR);
             $player->checkOpponentNear($simState->opponents, self::PLAYER_SIZE * self::BODYNEAR_FACTOR);
@@ -258,6 +265,7 @@ class MatchSimulation
         $this->handleBallPossession();
 
         $this->tickHistoric[] = [
+            "tick"      => $this->tickNumber,
             "ball"      => ["x" => $this->ball->x, "y" => $this->ball->y],
             "teamA"     => array_map(fn($p) => $p->getRenderData(), array_slice($this->players, 0, 3)),
             "teamB"     => array_map(fn($p) => $p->getRenderData(), array_slice($this->players, 3, 3)),
@@ -296,7 +304,7 @@ class MatchSimulation
             $dx = $targetX - $this->ball->x;
             $dy = $targetY - $this->ball->y;
             $dist = sqrt($dx * $dx + $dy * $dy);
-            $force = (3 + min($dist * 0.01, 3)) * (0.6 + 0.4 * $player->currentStrength);
+            $force = (3 + min($dist * 0.01, 3)) * (0.6 + 0.4 * $player->stamina) * $player->strengthForceFactor;
             $this->ball->applyForce(['x' => $targetX, 'y' => $targetY], $force);
             $player->ballCooldown = self::BALLCOOLDOWN_PASS;
             $this->log(['key' => 'log_pass', 'team' => str_replace('Team ', '', $player->team), 'player' => $player->name, 'target' => $target->name]);
@@ -305,7 +313,7 @@ class MatchSimulation
                 "x" => (($this->width + self::GOAL_SIZE) * 0.5) - rand(0, self::GOAL_SIZE) + (rand(-1000, 1000) / 1000) * $dev,
                 "y" => ($player->team === "Team A" ? $this->height : 0)
             ];
-            $force = 10 * (0.5 + 0.5 * $player->currentStrength);
+            $force = 10 * (0.5 + 0.5 * $player->stamina) * $player->strengthForceFactor;
             $this->ball->applyForce($target, $force);
             $player->ballCooldown = self::BALLCOOLDOWN_SHOOT;
             $this->log(['key' => 'log_shoot', 'team' => str_replace('Team ', '', $player->team), 'player' => $player->name]);
@@ -472,33 +480,6 @@ class MatchSimulation
                 $this->log(['key' => 'log_dribble', 'team' => str_replace('Team ', '', $this->currentPlayerWithBall->team), 'player' => $this->currentPlayerWithBall->name, 'target' => $op->name]);
             }
         }
-    }
-
-    private function selectBallChasers(): array
-    {
-        $chasers = [];
-
-        foreach (['Team A', 'Team B'] as $team) {
-            $candidates = array_filter($this->players, fn($p) =>
-                $p->team === $team && $p->bodyCooldown <= 0 &&
-                in_array($p->currentAction, [PlayerRules::A_GO_TO_BALL, PlayerRules::A_GO_TO_NEAR_RIVAL]) // "Go to the ball", "Go to near rival"
-            );
-
-            if (empty($candidates)) {
-                $chasers[$team] = null;
-                continue;
-            }
-
-            usort($candidates, fn($a, $b) =>
-                hypot($a->x - $this->ball->x, $a->y - $this->ball->y)
-                <=>
-                hypot($b->x - $this->ball->x, $b->y - $this->ball->y)
-            );
-
-            $chasers[$team] = $candidates[0]; // el más cercano
-        }
-
-        return $chasers;
     }
 
     public function getSummary(){

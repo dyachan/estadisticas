@@ -287,14 +287,14 @@ class PlayerStatPropertyTest extends TestCase
             'endurance' => 0.9,
             'name'      => 'HighEnd',
         ]));
-        $highEnd->currentStrength = 0.0;
+        $highEnd->stamina = 0.0;
         $highEnd->target = null; // resting → no depletion, pure recovery
 
         $lowEnd = new Player($this->makePlayerConfig([
             'endurance' => 0.1,
             'name'      => 'LowEnd',
         ]));
-        $lowEnd->currentStrength = 0.0;
+        $lowEnd->stamina = 0.0;
         $lowEnd->target = null;
 
         for ($t = 0; $t < $ticks; $t++) {
@@ -303,10 +303,10 @@ class PlayerStatPropertyTest extends TestCase
         }
 
         $this->assertGreaterThan(
-            $lowEnd->currentStrength * 3,
-            $highEnd->currentStrength,
-            "High-endurance player ({$highEnd->currentStrength} strength) should recover " .
-            "at least 3× more strength than low-endurance player ({$lowEnd->currentStrength}) " .
+            $lowEnd->stamina * 3,
+            $highEnd->stamina,
+            "High-endurance player ({$highEnd->stamina} strength) should recover " .
+            "at least 3× more strength than low-endurance player ({$lowEnd->stamina}) " .
             "after $ticks resting ticks"
         );
     }
