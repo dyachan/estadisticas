@@ -30,7 +30,7 @@ class MatchSimulation
     private const PLAYER_SIZE = 38;
     private const GOAL_SIZE = 120;
     private const SCAN_NEAR_RADIUS_MIN_OFFSET = 10;  // added to PLAYER_SIZE for min near-update radius (scan=0)
-    private const SCAN_NEAR_RADIUS_MAX = 150;         // near-update radius at full scan (scan=1)
+    private const SCAN_NEAR_RADIUS_MAX = 100;         // near-update radius at full scan (scan=1)
 
     public const TICKS_PER_MATCH = 5000;
 
